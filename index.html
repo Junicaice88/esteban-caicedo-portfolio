@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esteban Caicedo | Portfolio</title>
+  <meta name="description" content="Personal portfolio showcasing aerospace research, composite materials projects, and engineering design work." />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <!-- Header -->
+  <header class="bg-white shadow-md sticky top-0 z-10">
+    <nav class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-700">Esteban Caicedo</h1>
+      <div class="flex gap-6 text-sm">
+        <a href="#projects" class="text-gray-700 hover:text-blue-600">Projects</a>
+        <a href="https://www.linkedin.com" target="_blank" rel="noopener" class="text-gray-700 hover:text-blue-600">LinkedIn</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-6 py-16 text-center">
+    <img src="assets/profile.jpg" alt="Profile photo" class="w-28 h-28 mx-auto rounded-full shadow-lg mb-4 object-cover">
+    <h2 class="text-3xl font-semibold mb-2">Student Researcher – Centennial College</h2>
+    <p class="text-gray-600 mb-6">
+      Focused on aerospace composites, FEA/CFD simulation, and applied research in advanced manufacturing.
+    </p>
+    <a href="#projects" class="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">View Projects</a>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="max-w-5xl mx-auto px-6 py-12">
+    <h3 class="text-2xl font-bold mb-8 text-center">Projects</h3>
+    <div id="project-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 text-center py-6 mt-12">
+    <p>© 2025 Esteban Caicedo | Built with TailwindCSS · Deployed on Netlify</p>
+  </footer>
+
+  <script>
+    // Load project cards dynamically
+    fetch('projects.json')
+      .then(res => res.json())
+      .then(data => {
+        const grid = document.getElementById('project-grid');
+        data.forEach(p => {
+          const card = `
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition">
+              <img src="\${p.image}" alt="\${p.title}" class="h-48 w-full object-cover">
+              <div class="p-4">
+                <h4 class="font-semibold text-lg mb-2">\${p.title}</h4>
+                <p class="text-sm text-gray-600 mb-2">\${p.description}</p>
+                <div class="flex flex-wrap gap-2 mb-3">
+                  \${p.tags.map(t => `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">\${t}</span>`).join('')}
+                </div>
+                \${p.link ? `<a href="\${p.link}" target="_blank" class="text-blue-700 text-sm underline">View more</a>` : ''}
+              </div>
+            </div>
+          `;
+          grid.insertAdjacentHTML('beforeend', card);
+        });
+      });
+  </script>
+</body>
+</html>

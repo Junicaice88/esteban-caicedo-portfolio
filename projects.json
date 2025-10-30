@@ -1,0 +1,24 @@
+[
+  {
+    "title": "C-Bond Composite Panels",
+    "description": "Carbon fiber panels with honeycomb core tested for damage and repair with partners Comtek and L3 Harris. Data analyzed by Bombardier and McGill University for aerospace implementation.",
+    "tags": [
+      "Composites",
+      "Aerospace",
+      "Research"
+    ],
+    "image": "assets/c-bond.jpg",
+    "link": ""
+  },
+  {
+    "title": "Plant Simulation \u2013 Throughput Optimization",
+    "description": "Built Simcenter model for production line optimization. Increased daily throughput by adjusting buffer capacities and system logic.",
+    "tags": [
+      "Simulation",
+      "Manufacturing",
+      "Siemens"
+    ],
+    "image": "assets/plant-simulation.jpg",
+    "link": ""
+  }
+]
