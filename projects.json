@@ -1,7 +1,7 @@
 [
   {
     "title": "C-Bond Composite Panels",
-    "description": "Carbon fiber panels with honeycomb core tested for damage and repair with partners Comtek and L3 Harris. Data analyzed by Bombardier and McGill University for aerospace implementation.",
+    "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; collaboration with Comtek & L3Harris, analysis by Bombardier & McGill.",
     "tags": [
       "Composites",
       "Aerospace",
@@ -11,14 +11,36 @@
     "link": ""
   },
   {
-    "title": "Plant Simulation \u2013 Throughput Optimization",
-    "description": "Built Simcenter model for production line optimization. Increased daily throughput by adjusting buffer capacities and system logic.",
+    "title": "Plant Simulation \u2014 Throughput Optimization",
+    "description": "Simcenter/Plant Simulation model to explore buffer strategies and increase daily throughput on a production line.",
     "tags": [
       "Simulation",
       "Manufacturing",
       "Siemens"
     ],
     "image": "assets/plant-simulation.jpg",
+    "link": ""
+  },
+  {
+    "title": "CFD ANSYS Simulations",
+    "description": "2D/3D CFD exercises to study flow patterns, pressure fields and wake behavior around simple geometries.",
+    "tags": [
+      "CFD",
+      "ANSYS",
+      "FEA/CFD"
+    ],
+    "image": "assets/cfd.jpg",
+    "link": ""
+  },
+  {
+    "title": "Proximity Sensor (Arduino)",
+    "description": "Small proximity sensor prototype with visual (LED) and acoustic (buzzer) alerts developed for an avionics course.",
+    "tags": [
+      "Avionics",
+      "Arduino",
+      "Electronics"
+    ],
+    "image": "assets/proximity.jpg",
     "link": ""
   }
 ]
