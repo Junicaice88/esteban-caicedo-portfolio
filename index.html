@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Portfolio — Lightbox + Video</title>
+  <title>Esteban Caicedo | Portfolio</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -36,12 +36,30 @@
 
 </head>
 <body class="bg-bg text-ink font-sans">
-  <section class="max-w-6xl mx-auto px-6 py-12">
-    <h1 class="text-3xl font-semibold mb-6">Demo Index</h1>
+  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="/" class="text-xl sm:text-2xl font-bold text-brand">Esteban Caicedo</a>
+      <div class="flex items-center gap-6 text-sm">
+        <a href="#projects" class="hover:text-brand">Projects</a>
+        <a href="#experience" class="hover:text-brand">Experience</a>
+        <a href="#education" class="hover:text-brand">Education</a>
+        <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand">LinkedIn</a>
+      </div>
+    </nav>
+  </header>
+  <section class="max-w-6xl mx-auto px-6 py-14 sm:py-20 text-center">
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-3">Engineering Projects</h1>
+    <p class="text-mute max-w-2xl mx-auto">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p>
+  </section>
+  <section id="projects" class="max-w-6xl mx-auto px-6 py-12">
+    <h2 class="text-2xl font-bold mb-6">Projects</h2>
     <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </section>
-
+  <footer class="border-t border-white/5 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">© 2025 Esteban Caicedo · Built with TailwindCSS · Deployed on Netlify</div>
+  </footer>
   <script>
+    const gridEl = document.getElementById('grid');
     function mountImageSlider(container, images, height, opts){
       opts = opts || {}; const autoplay = !!opts.autoplay; const interval = opts.interval || 3000;
       container.classList.add('slider'); container.style.height = height + 'px';
@@ -54,10 +72,17 @@
       let dots=null; if(images.length>1){ const left=document.createElement('div'); left.className='ctrl left'; left.textContent='‹'; const right=document.createElement('div'); right.className='ctrl right'; right.textContent='›'; dots=document.createElement('div'); dots.className='dots'; images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); }); container.append(left,right,dots); left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1); }
       if(autoplay && images.length>1){ let start=()=>timer=setInterval(()=>show(idx+1), interval), stop=()=>{ if(timer){clearInterval(timer); timer=null;} }; start(); container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start); }
     }
-    const grid=document.getElementById('grid');
-    const card=document.createElement('div'); card.className='bg-card/70 border border-white/5 rounded-2xl overflow-hidden';
-    const s=document.createElement('div'); mountImageSlider(s, ['assets/demo1.jpg','assets/demo2.jpg'], 180, {autoplay:true}); card.appendChild(s);
-    grid.appendChild(card);
+    function card(project){
+      const a = document.createElement('a'); a.href='project.html?slug='+project.slug; a.className='bg-card/70 border border-white/5 rounded-2xl overflow-hidden hover:scale-[1.02] transition block';
+      const sliderWrap=document.createElement('div');
+      const imgs = (project.media||[]).filter(m=>m.type==='image').map(m=>m.src);
+      mountImageSlider(sliderWrap, imgs.length?imgs:['assets/demo1.jpg'], 180, {autoplay:true, interval:3000});
+      const body=document.createElement('div'); body.className='p-4';
+      const h=document.createElement('h4'); h.className='font-semibold text-lg mb-1'; h.textContent=project.title;
+      const p=document.createElement('p'); p.className='text-sm text-mute mb-3'; p.textContent=project.description||'';
+      body.append(h,p); a.append(sliderWrap, body); return a;
+    }
+    fetch('projects.json').then(r=>r.json()).then(projects=>{ gridEl.innerHTML=''; projects.forEach(p=> gridEl.appendChild(card(p))); });
   </script>
 </body>
 </html>
