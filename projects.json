@@ -17,6 +17,31 @@
     "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
   {
+    "title": "Machining Fixture",
+    "slug": "machining-fixture",
+    "description": "From-scratch machining fixture to locate and secure linkage blocks for precise milling/drilling. Complete assembly, drawings, and BOM in CATIA V5.",
+    "longDescription": "This machining fixture was developed during the 4th semester as part of the AMET\u2011223 Tool Design course. The goal was to design, assemble, and document a functional fixture capable of locating and securing linkage blocks for precision machining operations.\n\nStarting from the red linkage supports as dimensional references, the entire system\u2014base plate, clamps, pivots, and fasteners\u2014was modeled in CATIA V5. The deliverables included full 3D modeling with an organized Product Tree, technical drawings (sections, tolerances, and a Bill of Materials), visualization renders, and a fully interactive 3D model.\n\nKey takeaways: fixture design principles, dimensional accuracy, manufacturability, and documentation for shop\u2011floor use.",
+    "tags": [
+      "CATIA V5",
+      "CAD",
+      "Assembly",
+      "Manufacturing",
+      "Tool Design",
+      "Fixtures"
+    ],
+    "images": [
+      "assets/machining_fixture_1.jpg",
+      "assets/machining_fixture_2.jpg",
+      "assets/machining_fixture_3.jpg",
+      "assets/machining_fixture_4.jpg",
+      "assets/machining_fixture_5.jpg",
+      "assets/machining_fixture_6.jpg",
+      "assets/machining_fixture_7.jpg",
+      "assets/machining_fixture_8.jpg"
+    ],
+    "model": "assets/models/MACHINING_FIXTURE.glb"
+  },
+  {
     "title": "C-Bond Composite Panels",
     "slug": "c-bond-composites",
     "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; industry collaboration.",
