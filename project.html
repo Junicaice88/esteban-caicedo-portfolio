@@ -11,6 +11,15 @@
       borderRadius: { '2xl': '1.25rem' }
     }}};
   </script>
+  <style>
+    .slider { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .slider img { width: 100%; height: 100%; object-fit: cover; display:block; }
+    .slider-dots { position: absolute; bottom: 8px; left: 0; right: 0; display:flex; justify-content:center; gap:6px; }
+    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
+    .dot.active { background: white; }
+    .arrow { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.35); color:white; border-radius:8px; cursor:pointer; user-select:none; }
+    .arrow.left { left:8px; } .arrow.right { right:8px; }
+  </style>
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
@@ -37,33 +46,79 @@
     const slug = qs('slug');
     const root = document.getElementById('content');
 
+    function buildCarousel(images){
+      const id = 'carousel_' + Math.random().toString(36).slice(2);
+      const first = images[0] || '';
+      return `
+        <div class="slider rounded-2xl border border-white/5" id="${id}" style="height:380px">
+          ${first ? `<img src="${first}" alt="">` : ''}
+          <div class="arrow left">‹</div>
+          <div class="arrow right">›</div>
+          <div class="slider-dots">${images.map((_,i)=>`<span class='dot ${i===0?'active':''}'></span>`).join('')}</div>
+        </div>
+        <script>
+          (function(){
+            const el = document.getElementById('${id}');
+            const img = el.querySelector('img');
+            const dots = el.querySelectorAll('.dot');
+            const left = el.querySelector('.left'); const right = el.querySelector('.right');
+            const imgs = ${JSON.stringify([])}.concat(${json.dumps([])}); // placeholder to avoid escaping
+          })();
+        </script>
+      `;
+    }
+
     fetch('projects.json').then(r=>r.json()).then(items=>{
       const p = items.find(x => x.slug === slug);
       if(!p){ root.innerHTML = '<p class="text-mute">Project not found.</p>'; return; }
-
       const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
 
-      root.innerHTML = `
+      // Build description first
+      const descHTML = `
         <h1 class="text-3xl font-semibold">${p.title}</h1>
-        <div class="text-mute flex flex-wrap gap-2 mb-4">
+        <p class="text-mute leading-relaxed">${p.longDescription || "Project description coming soon."}</p>
+        <div class="text-mute flex flex-wrap gap-2 mt-3">
           ${p.tags.map(t => `<span class="text-xs px-2 py-1 rounded bg-white/5 border border-white/10">${t}</span>`).join('')}
         </div>
-
-        ${p.model ? `
-          <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-            <model-viewer src="${p.model}" camera-controls auto-rotate style="width:100%;height:520px;background:#0f1525;"></model-viewer>
-          </div>` : ''}
-
-        ${images.length ? `
-          <div class="grid sm:grid-cols-2 gap-4">
-            ${images.map(src => `<img src="${src}" class="w-full h-56 object-cover rounded-2xl border border-white/5" />`).join('')}
-          </div>` : ''}
-
-        <section class="bg-card/70 border border-white/5 rounded-2xl p-6">
-          <h2 class="text-xl font-semibold mb-2">Description</h2>
-          <p class="text-mute leading-relaxed">${p.longDescription || "Project description coming soon."}</p>
-        </section>
       `;
+
+      // Side by side: model and carousel
+      const bodyHTML = `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+            ${p.model ? `<model-viewer src="${p.model}" camera-controls auto-rotate style="width:100%;height:380px;background:#0f1525;"></model-viewer>` : ''}
+          </div>
+          <div>
+            <div class="slider rounded-2xl border border-white/5" style="height:380px" data-images='${JSON.stringify(images)}'>
+              ${images[0] ? `<img src="${images[0]}" alt="">` : ''}
+              <div class="arrow left">‹</div>
+              <div class="arrow right">›</div>
+              <div class="slider-dots">${images.map((_,i)=>`<span class='dot ${i===0?'active':''}'></span>`).join('')}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      root.innerHTML = descHTML + bodyHTML;
+
+      // Mount carousel behavior
+      const wrap = document.querySelector('.slider[data-images]');
+      if(wrap){
+        const imgs = JSON.parse(wrap.getAttribute('data-images'));
+        let idx = 0;
+        const imgEl = wrap.querySelector('img');
+        const dots = [...wrap.querySelectorAll('.dot')];
+        function set(n){
+          idx = (n+imgs.length)%imgs.length;
+          imgEl.src = imgs[idx];
+          dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
+        }
+        wrap.querySelector('.left').onclick = ()=> set(idx-1);
+        wrap.querySelector('.right').onclick = ()=> set(idx+1);
+        let timer = setInterval(()=> set(idx+1), 3000);
+        wrap.addEventListener('mouseenter', ()=> clearInterval(timer));
+        wrap.addEventListener('mouseleave', ()=> timer = setInterval(()=> set(idx+1), 3000));
+      }
     });
   </script>
 </body>

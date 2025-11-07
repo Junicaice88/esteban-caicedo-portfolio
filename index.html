@@ -11,6 +11,15 @@
       borderRadius: { '2xl': '1.25rem' }
     }}};
   </script>
+  <style>
+    .slider { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .slider img { width: 100%; height: 100%; object-fit: cover; display:block; }
+    .slider-dots { position: absolute; bottom: 8px; left: 0; right: 0; display:flex; justify-content:center; gap:6px; }
+    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
+    .dot.active { background: white; }
+    .arrow { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.35); color:white; border-radius:8px; cursor:pointer; user-select:none; }
+    .arrow.left { left:8px; } .arrow.right { right:8px; }
+  </style>
 
 </head>
 <body class="bg-bg text-ink font-sans">
@@ -55,10 +64,14 @@
     let activeTag = 'All';
 
     function cardHTML(p){
-      const preview = (p.images && p.images.length) ? p.images[0] : (p.image || '');
+      const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+      const preview = imgs[0] || '';
+      const id = `s_${Math.random().toString(36).slice(2)}`;
       return `
         <a href="project.html?slug=${p.slug}" class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden hover:scale-[1.02] transition block">
-          ${preview ? `<img src="${preview}" class="h-44 w-full object-cover">` : ''}
+          <div class="slider" style="height:180px" data-id="${id}" data-imgs='${JSON.stringify(imgs)}'>
+            ${preview ? `<img src="${preview}" alt="${p.title}">` : ''}
+          </div>
           <div class="p-4">
             <h4 class="font-semibold text-lg mb-1">${p.title}</h4>
             <p class="text-sm text-mute mb-3">${p.description || ''}</p>
@@ -68,6 +81,18 @@
           </div>
         </a>
       `;
+    }
+
+    function mountCardSliders(){
+      document.querySelectorAll('.slider').forEach(sl => {
+        const imgs = JSON.parse(sl.getAttribute('data-imgs')||'[]');
+        if(imgs.length <= 1) return;
+        let idx = 0;
+        setInterval(() => {
+          idx = (idx + 1) % imgs.length;
+          sl.querySelector('img').src = imgs[idx];
+        }, 2500);
+      });
     }
 
     fetch('projects.json').then(r=>r.json()).then(projects=>{
@@ -86,6 +111,7 @@
       function renderProjects(){
         const list = projects.filter(p=> activeTag==='All' || p.tags.includes(activeTag));
         gridEl.innerHTML = list.map(cardHTML).join('');
+        mountCardSliders();
       }
       renderFilters(); renderProjects();
     });
