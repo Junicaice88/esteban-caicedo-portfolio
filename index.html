@@ -1,63 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Portfolio — Lightbox + Video</title>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esteban Caicedo — Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: {
-      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
-      borderRadius: { '2xl': '1.25rem' }
-    }}};
-  </script>
-  <style>
-    .slider { position: relative; overflow: hidden; }
-    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
-    .slide-layer.active { opacity:1; }
-    .slide-layer img, .slide-layer video { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
-    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
-    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
-    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
-    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
-    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
-    .dot.active { background: white; }
-    .play-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-    .play-btn { width:64px; height:64px; border-radius:9999px; background:rgba(0,0,0,.45); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 16px rgba(0,0,0,.3); }
-    .play-btn::before { content:'▶'; margin-left:4px; }
-    .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:50; }
-    .lightbox.open { display:flex; }
-    .lightbox-inner { position:relative; max-width:92vw; max-height:92vh; width:92vw; height:92vh; }
-    .lightbox img, .lightbox video { width:100%; height:100%; object-fit:contain; background:#0b0f1a; }
-    .lb-close { position:absolute; top:12px; right:12px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
-    .lb-arrow { position:absolute; top:50%; transform:translateY(-50%); padding:10px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
-    .lb-arrow.left { left:12px; } .lb-arrow.right { right:12px; }
-  </style>
 
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0b1220', ink: '#e6eef9',
+            card: '#151b2b', dim:'#4058ca', brand:'#4f6af3'
+          },
+          borderRadius: { '2xl': '1.25rem' }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ---- Slider (cards & detail preview) ---- */
+    .slider { position:relative; overflow:hidden; }
+    .slide-layer{ position:absolute; inset:0; opacity:0; transition:opacity .45s ease; }
+    .slide-layer.active{ opacity:1; }
+    .slide-layer img, .slide-layer video{
+      width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none;
+    }
+    .ctrl{ position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px;
+      background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s;
+    }
+    .ctrl.left{ left:8px } .ctrl.right{ right:8px }
+    .slider:hover .ctrl{ opacity:1 }
+    .dots{ position:absolute; bottom:10px; left:0; right:0; display:flex; justify-content:center; gap:6px }
+    .dot{ width:8px; height:8px; border-radius:999px; background:rgba(255,255,255,.35) }
+    .dot.active{ background:white }
+    /* ---- Lightbox ---- */
+    .lb-open{ display:flex }
+    .lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:50 }
+    .lightbox-inner{ position:relative; max-width:92vw; max-height:92vh; width:92vw; height:92vh }
+    .lightbox img, .lightbox video{ width:100%; height:100%; object-fit:contain; background:#0b0f1a }
+    .lb-close{ position:absolute; top:12px; right:12px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer }
+  </style>
 </head>
+
 <body class="bg-bg text-ink font-sans">
+  <!-- Navbar -->
+  <header class="border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="/" class="text-xl font-semibold">Esteban Caicedo</a>
+      <nav class="space-x-6 text-sm">
+        <a href="#projects" class="hover:text-brand">Projects</a>
+        <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand">LinkedIn</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
   <section class="max-w-6xl mx-auto px-6 py-12">
-    <h1 class="text-3xl font-semibold mb-6">Demo Index</h1>
+    <h1 class="text-4xl font-bold mb-3">Engineering Projects</h1>
+    <p class="text-white/70">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="max-w-6xl mx-auto px-6 pb-16">
+    <h2 class="text-2xl font-semibold mb-4">Projects</h2>
     <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </section>
 
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox">
+    <div class="lightbox-inner">
+      <button class="lb-close" onclick="closeLightbox()">Close ✕</button>
+      <img id="lbImg" class="hidden" alt="">
+      <video id="lbVid" class="hidden" controls playsinline></video>
+    </div>
+  </div>
+
   <script>
-    function mountImageSlider(container, images, height, opts){
-      opts = opts || {}; const autoplay = !!opts.autoplay; const interval = opts.interval || 3000;
-      container.classList.add('slider'); container.style.height = height + 'px';
-      const a=document.createElement('div'); a.className='slide-layer active';
-      const b=document.createElement('div'); b.className='slide-layer';
-      const imgA=document.createElement('img'); const imgB=document.createElement('img');
-      imgA.src=images[0]||''; imgB.src=images[1]||images[0]||''; a.appendChild(imgA); b.appendChild(imgB); container.append(a,b);
-      let idx=0,useA=true,timer=null;
-      function show(n){ idx=(n+images.length)%images.length; const next=images[idx]; if(useA){ imgB.src=next; a.classList.remove('active'); b.classList.add('active'); } else { imgA.src=next; b.classList.remove('active'); a.classList.add('active'); } useA=!useA; if(dots) dots.childNodes.forEach((d,i)=> d.className='dot'+(i===idx?' active':'')); }
-      let dots=null; if(images.length>1){ const left=document.createElement('div'); left.className='ctrl left'; left.textContent='‹'; const right=document.createElement('div'); right.className='ctrl right'; right.textContent='›'; dots=document.createElement('div'); dots.className='dots'; images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); }); container.append(left,right,dots); left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1); }
-      if(autoplay && images.length>1){ let start=()=>timer=setInterval(()=>show(idx+1), interval), stop=()=>{ if(timer){clearInterval(timer); timer=null;} }; start(); container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start); }
+    /* ---------- tiny slider ---------- */
+    function mountSlider(container, items, opts={}){
+      const {height=180, interval=3000, autoplay=true} = opts;
+      container.classList.add('slider');
+      container.style.height = height + 'px';
+
+      const A=document.createElement('div'), B=document.createElement('div');
+      A.className='slide-layer active'; B.className='slide-layer';
+      const imgA=document.createElement(items[0].type==='video'?'video':'img');
+      const imgB=document.createElement(items[1]?.type==='video'?'video':'img');
+      setMediaSource(imgA, items[0]); A.appendChild(imgA);
+      if(items[1]){ setMediaSource(imgB, items[1]); B.appendChild(imgB); }
+
+      container.append(A,B);
+
+      let i=0, usingA=true, dots;
+      function setMediaSource(el, it){
+        if(it.type==='video'){ el.src = it.src; el.muted=true; el.loop=true; el.playsInline=true; el.autoplay=true; }
+        else el.src = it.src;
+      }
+      function show(n){
+        i = (n + items.length) % items.length;
+        const next = items[i];
+        const layerIn = usingA ? B : A, layerOut = usingA ? A : B;
+        layerIn.innerHTML='';
+        const el = document.createElement(next.type==='video'?'video':'img');
+        setMediaSource(el, next); layerIn.appendChild(el);
+        layerOut.classList.remove('active'); layerIn.classList.add('active');
+        usingA = !usingA;
+        if(dots){ [...dots.children].forEach((d,di)=> d.className = 'dot' + (di===i?' active':'')); }
+      }
+      // controls
+      const left=document.createElement('div'), right=document.createElement('div');
+      left.className='ctrl left'; right.className='ctrl right';
+      left.textContent='<'; right.textContent='>';
+      left.onclick=()=>show(i-1); right.onclick=()=>show(i+1);
+      container.append(left,right);
+
+      // dots
+      if(items.length>1){
+        dots=document.createElement('div'); dots.className='dots';
+        items.forEach((_,di)=>{ const d=document.createElement('span'); d.className='dot'+(di===0?' active':''); d.onclick=()=>show(di); dots.appendChild(d); });
+        container.append(dots);
+      }
+
+      let t=null;
+      function start(){ if(autoplay && items.length>1){ if(t) clearInterval(t); t=setInterval(()=>show(i+1), interval); } }
+      function stop(){ if(t){ clearInterval(t); t=null; } }
+      start(); container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start);
     }
-    const grid=document.getElementById('grid');
-    const card=document.createElement('div'); card.className='bg-card/70 border border-white/5 rounded-2xl overflow-hidden';
-    const s=document.createElement('div'); mountImageSlider(s, ['assets/demo1.jpg','assets/demo2.jpg'], 180, {autoplay:true}); card.appendChild(s);
-    grid.appendChild(card);
+
+    /* ---------- lightbox ---------- */
+    function openLightbox(src, type){
+      document.getElementById('lightbox').classList.add('lb-open');
+      const img=document.getElementById('lbImg'), vid=document.getElementById('lbVid');
+      if(type==='video'){ img.classList.add('hidden'); vid.classList.remove('hidden'); vid.src=src; vid.play(); }
+      else { vid.pause(); vid.classList.add('hidden'); img.classList.remove('hidden'); img.src=src; }
+    }
+    function closeLightbox(){
+      document.getElementById('lightbox').classList.remove('lb-open');
+      document.getElementById('lbVid').pause();
+    }
+
+    /* ---------- build cards from projects.json ---------- */
+    fetch('projects.json')
+      .then(r=>r.json())
+      .then(list=>{
+        const grid=document.getElementById('grid');
+        list.forEach(p=>{
+          // media for preview (first 1-3 items)
+          const preview = (p.media||[]).slice(0,3).map(m=>{
+            return { src:m.src, type:(m.type||guessType(m.src)) }
+          });
+
+          const card=document.createElement('a');
+          card.href = `project.html?slug=${encodeURIComponent(p.slug)}`;
+          card.className='bg-card/70 border border-white/5 rounded-2xl overflow-hidden block hover:border-white/15 transition';
+
+          const media=document.createElement('div');
+          mountSlider(media, preview.length?preview:[{src:'assets/demo1.jpg',type:'image'},{src:'assets/demo2.jpg',type:'image'}], {height:200, autoplay:true});
+          // clicking on slide opens lightbox but we keep link for title
+          media.addEventListener('click', (e)=>{
+            e.preventDefault(); e.stopPropagation();
+            const first = preview[0] || {src:'assets/demo1.jpg', type:'image'};
+            openLightbox(first.src, first.type);
+          });
+
+          const body=document.createElement('div');
+          body.className='p-4';
+          body.innerHTML = `
+            <h3 class="font-semibold">${p.title||'Untitled'}</h3>
+            <p class="text-sm text-white/70 mt-1 line-clamp-2">${p.summary||''}</p>
+          `;
+
+          card.append(media, body);
+          grid.appendChild(card);
+        });
+      });
+
+    function guessType(path){
+      const ext = path.split('.').pop().toLowerCase();
+      if(['mp4','webm','mov'].includes(ext)) return 'video';
+      return 'image';
+    }
   </script>
 </body>
 </html>

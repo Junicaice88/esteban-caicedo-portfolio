@@ -1,189 +1,192 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Project • Esteban Caicedo</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project — Esteban Caicedo</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/three@0.160.1/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.160.1/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://unpkg.com/three@0.160.1/examples/js/loaders/STLLoader.js"></script>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://unpkg.com/three@0.158.0/examples/js/loaders/STLLoader.js"></script>
   <style>
-    :root{color-scheme: dark;}
-    html,body{background:#0b1322;color:#e6edf3}
-    .card{background:#0f172a;border:1px solid rgba(255,255,255,.08)}
-    .fade-slide{position:relative;overflow:hidden;border-radius:16px}
-    .fade-slide > *{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
-    .fade-slide > *.active{opacity:1}
-    .dot{width:.5rem;height:.5rem;border-radius:9999px;background:rgba(255,255,255,.25)}
-    .dot.active{background:white}
+    .slider{position:relative;overflow:hidden}
+    .slide-layer{position:absolute;inset:0;opacity:0;transition:opacity .4s}
+    .slide-layer.active{opacity:1}
+    .dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35)}
+    .dot.active{background:#fff}
+    .ctrl{position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;border-radius:8px;opacity:0}
+    .slider:hover .ctrl{opacity:1}
+    .ctrl.left{left:8px}.ctrl.right{right:8px}
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50}
+    .lb-open{display:flex}
+    .lightbox-inner{position:relative;max-width:92vw;max-height:92vh;width:92vw;height:92vh}
+    .lightbox img,.lightbox video{width:100%;height:100%;object-fit:contain;background:#0b0f1a}
+    .lb-close{position:absolute;top:12px;right:12px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer}
   </style>
 </head>
-<body>
-  <header class="max-w-6xl mx-auto px-5 py-6 flex items-center justify-between">
-    <a class="text-xl font-semibold text-blue-300" href="./">Esteban Caicedo</a>
-    <a class="text-sm text-slate-300 hover:text-white" href="./#projects">← Back</a>
+<body class="bg-[#0b1220] text-white">
+  <header class="border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="/" class="text-xl font-semibold">Esteban Caicedo</a>
+      <a href="index.html" class="text-sm opacity-80 hover:opacity-100">← Back</a>
+    </div>
   </header>
-  <main class="max-w-6xl mx-auto px-5 pb-24" id="root"></main>
 
-  <div id="lightbox" class="fixed inset-0 bg-black/80 z-50 hidden">
-    <button id="closeLb" class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-3 py-1.5">Close</button>
-    <div class="w-full h-full flex items-center justify-center p-4">
-      <div id="lbInner" class="max-w-5xl w-full"></div>
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <div id="content"></div>
+  </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox">
+    <div class="lightbox-inner">
+      <button class="lb-close" onclick="closeLightbox()">Close ✕</button>
+      <img id="lbImg" class="hidden" alt="">
+      <video id="lbVid" class="hidden" controls playsinline></video>
     </div>
   </div>
 
-<script>
-const qs = new URLSearchParams(location.search);
-const slug = qs.get('slug');
-const root = document.getElementById('root');
+  <script>
+    const q = new URLSearchParams(location.search);
+    const slug = q.get('slug');
 
-const lightbox = document.getElementById('lightbox');
-const lbInner = document.getElementById('lbInner');
-document.getElementById('closeLb').onclick = ()=>{ lightbox.classList.add('hidden'); lbInner.innerHTML=''; }
+    /* simple slider reused */
+    function mountSlider(container, items, opts={}) {
+      const { height=360, interval=3000, autoplay=true } = opts;
+      container.classList.add('slider'); container.style.height = height+'px';
+      const A=document.createElement('div'), B=document.createElement('div'); A.className='slide-layer active'; B.className='slide-layer';
+      const mk = it => {
+        const el = document.createElement(it.type==='video'?'video':'img');
+        if(it.type==='video'){ el.src=it.src; el.muted=true; el.loop=true; el.playsInline=true; el.autoplay=true; }
+        else el.src=it.src; return el;
+      };
+      A.appendChild(mk(items[0]||{})); if(items[1]) B.appendChild(mk(items[1]));
+      container.append(A,B);
+      let i=0, useA=true, dots;
 
-function openLightbox(item){
-  lbInner.innerHTML='';
-  if(item.type==='image'){
-    const img = new Image();
-    img.src=item.src; img.className='w-full h-auto rounded-xl';
-    lbInner.appendChild(img);
-  }else{
-    const vid=document.createElement('video');
-    vid.src=item.src; vid.controls=true; vid.autoplay=true; vid.className='w-full h-auto rounded-xl';
-    lbInner.appendChild(vid);
-  }
-  lightbox.classList.remove('hidden');
-}
-
-function buildCarousel(media){
-  const wrap=document.createElement('div');
-  wrap.className='relative fade-slide aspect-[16/10] rounded-2xl overflow-hidden border border-white/10';
-  const dots=document.createElement('div');
-  dots.className='absolute left-1/2 -translate-x-1/2 bottom-2 flex gap-1.5 z-10';
-  media.forEach((m,i)=>{
-    let node;
-    if(m.type==='image'){
-      node=new Image(); node.src=m.src; node.className='w-full h-full object-cover'; node.dataset.idx=i;
-    }else{
-      node=document.createElement('video');
-      node.src=m.src; node.muted=true; node.loop=true; node.playsInline=true; node.dataset.idx=i;
-      node.className='w-full h-full object-cover';
-      node.oncanplay=()=>node.play().catch(()=>{});
-      const pill=document.createElement('div');
-      pill.className='absolute right-2 bottom-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full border border-white/20';
-      pill.textContent='Play';
-      pill.onclick=(e)=>{e.stopPropagation(); openLightbox(m);};
-      wrap.appendChild(pill);
-      node.addEventListener('click',(e)=>{e.stopPropagation(); openLightbox(m);});
+      const left=document.createElement('div'), right=document.createElement('div');
+      left.className='ctrl left'; right.className='ctrl right'; left.textContent='<'; right.textContent='>';
+      left.onclick=()=>show(i-1); right.onclick=()=>show(i+1); container.append(left,right);
+      if(items.length>1){
+        dots=document.createElement('div'); dots.className='dots';
+        items.forEach((_,di)=>{ const d=document.createElement('span'); d.className='dot'+(di===0?' active':''); d.onclick=()=>show(di); dots.append(d); });
+        container.append(dots);
+      }
+      function show(n){
+        i=(n+items.length)%items.length; const next=items[i];
+        const inL = useA?B:A, outL = useA?A:B; inL.innerHTML=''; inL.append(mk(next));
+        outL.classList.remove('active'); inL.classList.add('active'); useA=!useA;
+        if(dots) [...dots.children].forEach((d,di)=> d.className='dot'+(di===i?' active':'')); 
+      }
+      let t=null; function start(){ if(autoplay && items.length>1){ if(t)clearInterval(t); t=setInterval(()=>show(i+1), interval);} }
+      function stop(){ if(t){ clearInterval(t); t=null; } }
+      start(); container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start);
     }
-    wrap.appendChild(node);
-    const d=document.createElement('button'); d.className='dot'; d.dataset.idx=i; d.onclick=(e)=>{e.stopPropagation(); show(+e.currentTarget.dataset.idx);}; dots.appendChild(d);
-  });
-  wrap.appendChild(dots);
 
-  let i=0,timer;
-  const nodes=[...wrap.querySelectorAll('[data-idx]')];
-  const dotEls=[...dots.querySelectorAll('.dot')];
-  function show(n){
-    i=(n+nodes.length)%nodes.length;
-    nodes.forEach(el=>el.classList.remove('active'));
-    dotEls.forEach(el=>el.classList.remove('active'));
-    nodes[i].classList.add('active'); dotEls[i].classList.add('active');
-  }
-  function start(){ timer=setInterval(()=>show(i+1),3500); }
-  function stop(){ if(timer) clearInterval(timer); }
-  wrap.addEventListener('mouseenter', stop);
-  wrap.addEventListener('mouseleave', start);
-  wrap.addEventListener('click', ()=> openLightbox(media[i]));
-  show(0); start();
-  return wrap;
-}
+    function openLightbox(src, type){
+      document.getElementById('lightbox').classList.add('lb-open');
+      const img=document.getElementById('lbImg'), vid=document.getElementById('lbVid');
+      if(type==='video'){ img.classList.add('hidden'); vid.classList.remove('hidden'); vid.src=src; vid.play(); }
+      else { vid.pause(); vid.classList.add('hidden'); img.classList.remove('hidden'); img.src=src; }
+    }
+    function closeLightbox(){
+      document.getElementById('lightbox').classList.remove('lb-open'); document.getElementById('lbVid').pause();
+    }
+    function guessType(p){ const e=p.split('.').pop().toLowerCase(); return ['mp4','webm','mov'].includes(e)?'video':'image'; }
 
-function stlViewer(container, url){
-  const scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x0b1322);
-  const camera=new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 1000);
-  camera.position.set(3,2.2,3.8);
+    fetch('projects.json').then(r=>r.json()).then(all=>{
+      const p = all.find(x=>x.slug===slug);
+      const el = document.getElementById('content');
+      if(!p){ el.innerHTML='<p class="opacity-70">Project not found.</p>'; return; }
 
-  const renderer=new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(devicePixelRatio);
-  container.appendChild(renderer.domElement);
+      // header
+      const head = `
+        <h1 class="text-3xl font-semibold">${p.title}</h1>
+        <p class="opacity-70 mt-2">${p.longDescription||p.summary||''}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          ${(p.tags||[]).map(t=>`<span class="text-xs px-2 py-1 rounded bg-white/10">${t}</span>`).join('')}
+        </div>
+      `;
 
-  const controls=new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping=true;
+      // two columns
+      const cols = document.createElement('div');
+      cols.className='mt-8 grid md:grid-cols-2 gap-6';
 
-  const hemi=new THREE.HemisphereLight(0xffffff,0x223,0.9); scene.add(hemi);
-  const dir=new THREE.DirectionalLight(0xffffff,0.9); dir.position.set(5,10,8); scene.add(dir);
+      // 3D viewer
+      const viewer = document.createElement('div');
+      viewer.className='bg-[#151b2b] rounded-2xl border border-white/5 overflow-hidden';
+      viewer.style.height='360px';
+      cols.append(viewer);
 
-  const loader=new THREE.STLLoader();
-  loader.load(url, geo=>{
-    geo.computeVertexNormals();
-    const mat=new THREE.MeshPhysicalMaterial({color:0x9bbcff, metalness:0.2, roughness:0.35});
-    const mesh=new THREE.Mesh(geo, mat);
-    geo.computeBoundingBox();
-    const box=geo.boundingBox;
-    const size=new THREE.Vector3(); box.getSize(size);
-    const maxSide=Math.max(size.x,size.y,size.z);
-    const s=1/maxSide; mesh.scale.setScalar(s*2.2);
-    geo.computeBoundingSphere();
-    mesh.position.set(0,0,0);
-    mesh.castShadow=true; mesh.receiveShadow=true;
-    scene.add(mesh);
-  });
+      // gallery
+      const galWrap = document.createElement('div');
+      galWrap.className='bg-[#151b2b] rounded-2xl border border-white/5 overflow-hidden p-3';
+      const gal = document.createElement('div');
+      galWrap.append(gal);
+      cols.append(galWrap);
 
-  function onResize(){
-    const w=container.clientWidth, h=container.clientHeight;
-    camera.aspect=w/h; camera.updateProjectionMatrix();
-    renderer.setSize(w,h);
-  }
-  window.addEventListener('resize', onResize);
+      el.innerHTML = head; el.append(cols);
 
-  (function render(){ requestAnimationFrame(render); controls.update(); renderer.render(scene,camera); })();
-}
+      // build gallery
+      const media = (p.media||[]).map(m=>({src:m.src, type:(m.type||guessType(m.src))}));
+      mountSlider(gal, media.length?media:[{src:'assets/demo1.jpg',type:'image'}], {height:360,autoplay:true});
+      gal.addEventListener('click', (e)=>{ const first = media[0]||{src:'assets/demo1.jpg',type:'image'}; openLightbox(first.src, first.type); });
 
-fetch('projects.json').then(r=>r.json()).then(items=>{
-  const p=items.find(x=>x.slug===slug);
-  if(!p){ document.getElementById('root').innerHTML='<p class="text-slate-300">Project not found.</p>'; return; }
+      // load model (GLB / STL)
+      if(p.model){
+        initThree(viewer, p.model);
+      } else {
+        viewer.innerHTML = '<div class="h-full grid place-items-center opacity-60 text-sm">No 3D model for this project.</div>';
+      }
+    });
 
-  const descHTML = `
-    <h1 class="text-2xl sm:text-3xl font-semibold">${p.title}</h1>
-    <p class="mt-2 text-slate-300">${p.longDescription || p.description || 'Project description coming soon.'}</p>
-    <div class="mt-3 flex flex-wrap gap-2">
-      ${(p.tags||[]).map(t=>`<span class="text-xs px-2 py-1 rounded-full border border-white/15 bg-white/5">${t}</span>`).join('')}
-    </div>
-  `;
+    function initThree(container, url){
+      const ext = url.split('.').pop().toLowerCase();
+      const scene=new THREE.Scene(); scene.background = new THREE.Color(0x0b1220);
+      const camera=new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, .1, 1000);
+      const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(container.clientWidth, container.clientHeight); container.appendChild(renderer.domElement);
+      const light1=new THREE.DirectionalLight(0xffffff,.9); light1.position.set(1,1,1);
+      const light2=new THREE.AmbientLight(0xffffff,.35); scene.add(light1,light2);
 
-  const mediaCarousel = buildCarousel(p.media && p.media.length ? p.media : []);
-  const isGLB = /\.glb$/i.test(p.model||'');
-  const isSTL = /\.stl$/i.test(p.model||'');
+      let mesh=null;
+      function fit(obj){
+        const box=new THREE.Box3().setFromObject(obj); const size=new THREE.Vector3(); box.getSize(size);
+        const center=new THREE.Vector3(); box.getCenter(center);
+        const maxDim=Math.max(size.x,size.y,size.z);
+        const dist=maxDim*2.2; camera.position.set(center.x+dist, center.y+dist, center.z+dist);
+        camera.lookAt(center);
+      }
 
-  let modelHTML='';
-  if(isGLB){
-    modelHTML = `<model-viewer src="${p.model}" camera-controls auto-rotate style="width:100%;height:100%;background:#0b1322;border-radius:16px;border:1px solid rgba(255,255,255,.08)"></model-viewer>`;
-  } else if(isSTL){
-    modelHTML = `<div id="stlHost" class="w-full h-full rounded-2xl border border-white/10"></div>`;
-  } else {
-    modelHTML = `<div class="w-full h-full rounded-2xl border border-white/10 flex items-center justify-center text-slate-400">No model</div>`;
-  }
+      if(ext==='glb' || ext==='gltf'){
+        const loader=new THREE.GLTFLoader();
+        loader.load(url, glb=>{
+          mesh=glb.scene; scene.add(mesh); fit(mesh);
+        });
+      } else if(ext==='stl'){
+        const loader=new THREE.STLLoader();
+        loader.load(url, geo=>{
+          const mat=new THREE.MeshStandardMaterial({color:0xa8b7ff, metalness:0.15, roughness:0.35});
+          mesh=new THREE.Mesh(geo, mat); scene.add(mesh); fit(mesh);
+        });
+      }
 
-  document.getElementById('root').innerHTML = `
-    <div class="mb-6">${descHTML}</div>
-    <div class="grid md:grid-cols-2 gap-6 items-start">
-      <div class="min-h-[360px] md:min-h-[420px]">${modelHTML}</div>
-      <div class="min-h-[360px] md:min-h-[420px]">${mediaCarousel.outerHTML}</div>
-    </div>
-  `;
+      let isDown=false, lx=0, ly=0, rx=0, ry=0, sc=1;
+      renderer.domElement.addEventListener('mousedown',e=>{isDown=true; lx=e.clientX; ly=e.clientY;});
+      window.addEventListener('mouseup',()=>isDown=false);
+      window.addEventListener('mousemove',e=>{
+        if(isDown && mesh){
+          const dx=(e.clientX-lx)*0.01, dy=(e.clientY-ly)*0.01; mesh.rotation.y += dx; mesh.rotation.x += dy; lx=e.clientX; ly=e.clientY;
+        }
+      });
+      renderer.domElement.addEventListener('wheel',e=>{
+        sc *= (e.deltaY>0?1.08:0.92); sc=Math.min(5, Math.max(0.35, sc)); camera.zoom=1/sc; camera.updateProjectionMatrix();
+      });
 
-  if(isSTL){
-    const host=document.getElementById('stlHost');
-    stlViewer(host, p.model);
-  }
-}).catch(err=>{
-  document.getElementById('root').innerHTML = `<p class="text-slate-300">Failed to load project.<br>${err}</p>`;
-});
-</script>
+      function onResize(){ const w=container.clientWidth, h=container.clientHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+      window.addEventListener('resize', onResize);
+
+      (function animate(){ requestAnimationFrame(animate); renderer.render(scene,camera); })();
+    }
+  </script>
 </body>
 </html>
