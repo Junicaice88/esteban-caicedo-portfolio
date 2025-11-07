@@ -1,88 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Esteban Caicedo | Portfolio</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: {
-      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
-      borderRadius: { '2xl': '1.25rem' }
-    }}};
-  </script>
-  <style>
-    .slider { position: relative; overflow: hidden; }
-    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
-    .slide-layer.active { opacity:1; }
-    .slide-layer img, .slide-layer video { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
-    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
-    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
-    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
-    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
-    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
-    .dot.active { background: white; }
-    .play-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-    .play-btn { width:64px; height:64px; border-radius:9999px; background:rgba(0,0,0,.45); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 16px rgba(0,0,0,.3); }
-    .play-btn::before { content:'▶'; margin-left:4px; }
-    .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:50; }
-    .lightbox.open { display:flex; }
-    .lightbox-inner { position:relative; max-width:92vw; max-height:92vh; width:92vw; height:92vh; }
-    .lightbox img, .lightbox video { width:100%; height:100%; object-fit:contain; background:#0b0f1a; }
-    .lb-close { position:absolute; top:12px; right:12px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
-    .lb-arrow { position:absolute; top:50%; transform:translateY(-50%); padding:10px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
-    .lb-arrow.left { left:12px; } .lb-arrow.right { right:12px; }
-  </style>
-
-</head>
-<body class="bg-bg text-ink font-sans">
-  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
-    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="/" class="text-xl sm:text-2xl font-bold text-brand">Esteban Caicedo</a>
-      <div class="flex items-center gap-6 text-sm">
-        <a href="#projects" class="hover:text-brand">Projects</a>
-        <a href="#experience" class="hover:text-brand">Experience</a>
-        <a href="#education" class="hover:text-brand">Education</a>
-        <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand">LinkedIn</a>
-      </div>
-    </nav>
-  </header>
-  <section class="max-w-6xl mx-auto px-6 py-14 sm:py-20 text-center">
-    <h1 class="text-3xl sm:text-4xl font-semibold mb-3">Engineering Projects</h1>
-    <p class="text-mute max-w-2xl mx-auto">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p>
-  </section>
-  <section id="projects" class="max-w-6xl mx-auto px-6 py-12">
-    <h2 class="text-2xl font-bold mb-6">Projects</h2>
-    <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-  </section>
-  <footer class="border-t border-white/5 mt-16">
-    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">© 2025 Esteban Caicedo · Built with TailwindCSS · Deployed on Netlify</div>
-  </footer>
-  <script>
-    const gridEl = document.getElementById('grid');
-    function mountImageSlider(container, images, height, opts){
-      opts = opts || {}; const autoplay = !!opts.autoplay; const interval = opts.interval || 3000;
-      container.classList.add('slider'); container.style.height = height + 'px';
-      const a=document.createElement('div'); a.className='slide-layer active';
-      const b=document.createElement('div'); b.className='slide-layer';
-      const imgA=document.createElement('img'); const imgB=document.createElement('img');
-      imgA.src=images[0]||''; imgB.src=images[1]||images[0]||''; a.appendChild(imgA); b.appendChild(imgB); container.append(a,b);
-      let idx=0,useA=true,timer=null;
-      function show(n){ idx=(n+images.length)%images.length; const next=images[idx]; if(useA){ imgB.src=next; a.classList.remove('active'); b.classList.add('active'); } else { imgA.src=next; b.classList.remove('active'); a.classList.add('active'); } useA=!useA; if(dots) dots.childNodes.forEach((d,i)=> d.className='dot'+(i===idx?' active':'')); }
-      let dots=null; if(images.length>1){ const left=document.createElement('div'); left.className='ctrl left'; left.textContent='‹'; const right=document.createElement('div'); right.className='ctrl right'; right.textContent='›'; dots=document.createElement('div'); dots.className='dots'; images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); }); container.append(left,right,dots); left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1); }
-      if(autoplay && images.length>1){ let start=()=>timer=setInterval(()=>show(idx+1), interval), stop=()=>{ if(timer){clearInterval(timer); timer=null;} }; start(); container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start); }
-    }
-    function card(project){
-      const a = document.createElement('a'); a.href='project.html?slug='+project.slug; a.className='bg-card/70 border border-white/5 rounded-2xl overflow-hidden hover:scale-[1.02] transition block';
-      const sliderWrap=document.createElement('div');
-      const imgs = (project.media||[]).filter(m=>m.type==='image').map(m=>m.src);
-      mountImageSlider(sliderWrap, imgs.length?imgs:['assets/demo1.jpg'], 180, {autoplay:true, interval:3000});
-      const body=document.createElement('div'); body.className='p-4';
-      const h=document.createElement('h4'); h.className='font-semibold text-lg mb-1'; h.textContent=project.title;
-      const p=document.createElement('p'); p.className='text-sm text-mute mb-3'; p.textContent=project.description||'';
-      body.append(h,p); a.append(sliderWrap, body); return a;
-    }
-    fetch('projects.json').then(r=>r.json()).then(projects=>{ gridEl.innerHTML=''; projects.forEach(p=> gridEl.appendChild(card(p))); });
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Esteban Caicedo | Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{bg:'#0b1220',card:'#151b2b',ink:'#e6e9f5',mute:'#9aa3b2',brand:{DEFAULT:'#4f6af3',dim:'#4058ca'}},borderRadius:{'2xl':'1.25rem'}}}};</script>
+<style>.slider{position:relative;overflow:hidden}.slide-layer{position:absolute;inset:0;opacity:0;transition:opacity .6s}.slide-layer.active{opacity:1}.slide-layer img{width:100%;height:100%;object-fit:cover}
+.ctrl{position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;border-radius:8px;cursor:pointer;opacity:0;pointer-events:none;transition:.2s}
+.slider:hover .ctrl{opacity:1;pointer-events:auto}.ctrl.left{left:8px}.ctrl.right{right:8px}.dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px}.dot{width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.35)}.dot.active{background:#fff}</style>
+</head><body class="bg-bg text-ink">
+<header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10"><nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center"><a href="/" class="text-xl sm:text-2xl font-bold text-brand">Esteban Caicedo</a><div class="flex items-center gap-6 text-sm"><a href="#projects" class="hover:text-brand">Projects</a><a class="hover:text-brand">Experience</a><a class="hover:text-brand">Education</a><a class="hover:text-brand" target="_blank" href="https://www.linkedin.com/in/esteban-caicedo-945bb1300">LinkedIn</a></div></nav></header>
+<section class="max-w-6xl mx-auto px-6 py-14 sm:py-20 text-center"><h1 class="text-3xl sm:text-4xl font-semibold mb-3">Engineering Projects</h1><p class="text-mute max-w-2xl mx-auto">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p></section>
+<section id="projects" class="max-w-6xl mx-auto px-6 py-12"><h2 class="text-2xl font-bold mb-6">Projects</h2><div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div></section>
+<footer class="border-t border-white/5 mt-16"><div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">© 2025 Esteban Caicedo · Built with TailwindCSS · Deployed on Netlify</div></footer>
+<script>
+const gridEl=document.getElementById('grid');
+function mountImageSlider(container, images, height){container.classList.add('slider');container.style.height=height+'px';const a=document.createElement('div');a.className='slide-layer active';const b=document.createElement('div');b.className='slide-layer';container.append(a,b);const imgA=document.createElement('img');const imgB=document.createElement('img');imgA.src=images[0]||'';imgB.src=images[1]||images[0]||'';a.appendChild(imgA);b.appendChild(imgB);let idx=0,useA=true;function show(n){idx=(n+images.length)%images.length;const next=images[idx];if(useA){imgB.src=next;a.classList.remove('active');b.classList.add('active')}else{imgA.src=next;b.classList.remove('active');a.classList.add('active')}useA=!useA;if(dots) dots.childNodes.forEach((d,i)=>d.className='dot'+(i===idx?' active':''))}let dots=null;if(images.length>1){const L=document.createElement('div');L.className='ctrl left';L.textContent='‹';const R=document.createElement('div');R.className='ctrl right';R.textContent='›';dots=document.createElement('div');dots.className='dots';images.forEach((_,i)=>{const d=document.createElement('span');d.className='dot'+(i===0?' active':'');d.onclick=()=>show(i);dots.appendChild(d)});container.append(L,R,dots);L.onclick=()=>show(idx-1);R.onclick=()=>show(idx+1)}}
+function card(p){const a=document.createElement('a');a.href='project.html?slug='+encodeURIComponent(p.slug);a.className='bg-card/70 border border-white/5 rounded-2xl overflow-hidden hover:scale-[1.02] transition block';const wrap=document.createElement('div');const imgs=(p.media||[]).filter(m=>m.type==='image').map(m=>m.src);mountImageSlider(wrap, imgs.length?imgs:['assets/demo.jpg'], 180);const body=document.createElement('div');body.className='p-4';const h=document.createElement('h4');h.className='font-semibold text-lg mb-1';h.textContent=p.title;const d=document.createElement('p');d.className='text-sm text-mute mb-3';d.textContent=p.description||'';body.append(h,d);a.append(wrap,body);return a}
+fetch('projects.json').then(r=>r.json()).then(items=>{gridEl.innerHTML='';items.forEach(p=>gridEl.appendChild(card(p))) });
+</script>
+</body></html>

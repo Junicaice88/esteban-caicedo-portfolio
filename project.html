@@ -1,108 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Project — Esteban Caicedo</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: {
-      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
-      borderRadius: { '2xl': '1.25rem' }
-    }}};
-  </script>
-  <style>
-    .slider { position: relative; overflow: hidden; }
-    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
-    .slide-layer.active { opacity:1; }
-    .slide-layer img, .slide-layer video { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
-    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
-    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
-    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
-    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
-    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
-    .dot.active { background: white; }
-    .play-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-    .play-btn { width:64px; height:64px; border-radius:9999px; background:rgba(0,0,0,.45); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 16px rgba(0,0,0,.3); }
-    .play-btn::before { content:'▶'; margin-left:4px; }
-    .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:50; }
-    .lightbox.open { display:flex; }
-    .lightbox-inner { position:relative; max-width:92vw; max-height:92vh; width:92vw; height:92vh; }
-    .lightbox img, .lightbox video { width:100%; height:100%; object-fit:contain; background:#0b0f1a; }
-    .lb-close { position:absolute; top:12px; right:12px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
-    .lb-arrow { position:absolute; top:50%; transform:translateY(-50%); padding:10px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
-    .lb-arrow.left { left:12px; } .lb-arrow.right { right:12px; }
-  </style>
-
-</head>
-<body class="bg-bg text-ink font-sans">
-  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
-    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a>
-      <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand text-sm">LinkedIn</a>
-    </nav>
-  </header>
-  <main class="max-w-6xl mx-auto px-6 py-8">
-    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
-    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
-    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
-    <div class="grid md:grid-cols-2 gap-4">
-      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-        <div id="carousel" class="slider" style="height:360px"></div>
-      </div>
-      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
-      </div>
-    </div>
-  </main>
-  <div id="lightbox" class="lightbox">
-    <div class="lightbox-inner">
-      <span class="lb-close">✕</span>
-      <span class="lb-arrow left">‹</span>
-      <span class="lb-arrow right">›</span>
-      <div id="lb-media"></div>
-    </div>
-  </div>
-  <footer class="border-t border-white/5 mt-16">
-    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">© 2025 Esteban Caicedo</div>
-  </footer>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <script>
-    const isVideo = (src)=> /\.mp4$|\.webm$/i.test(src);
-    function qs(k){ return new URLSearchParams(location.search).get(k); }
-    const slug = qs('slug');
-    function mountMixedSlider(container, media, height){
-      container.classList.add('slider'); container.style.height = height + 'px';
-      const a = document.createElement('div'); a.className='slide-layer active';
-      const b = document.createElement('div'); b.className='slide-layer';
-      container.append(a,b);
-      function renderLayer(layer, item, index){
-        layer.innerHTML='';
-        if(item.type==='video' || isVideo(item.src)){
-          const v=document.createElement('video'); v.src=item.src; v.muted=true; v.controls=true; v.preload='metadata'; v.playsInline=true; layer.appendChild(v);
-          const overlay=document.createElement('div'); overlay.className='play-overlay'; const btn=document.createElement('div'); btn.className='play-btn'; overlay.appendChild(btn); layer.appendChild(overlay);
-          btn.onclick=(e)=>{ e.stopPropagation(); if(v.paused) v.play(); else v.pause(); };
-          layer.onclick=()=> openLightbox(index);
-        } else {
-          const img=document.createElement('img'); img.src=item.src; layer.appendChild(img);
-          layer.onclick=()=> openLightbox(index);
-        }
-      }
-      let index=0, useA=true;
-      renderLayer(a, media[0]||{type:'image',src:''}, 0);
-      renderLayer(b, media[1]||media[0]||{type:'image',src:''}, 1);
-      function show(n){ index=(n+media.length)%media.length; const next=media[index]; if(useA){ renderLayer(b,next,index); a.classList.remove('active'); b.classList.add('active'); } else { renderLayer(a,next,index); b.classList.remove('active'); a.classList.add('active'); } useA=!useA; updateDots(); }
-      let dots=null; if(media.length>1){ const left=document.createElement('div'); left.className='ctrl left'; left.textContent='‹'; const right=document.createElement('div'); right.className='ctrl right'; right.textContent='›'; dots=document.createElement('div'); dots.className='dots'; media.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); }); container.append(left,right,dots); left.onclick=()=>show(index-1); right.onclick=()=>show(index+1);
-        let startX=null, dragging=false; const threshold=40; const onStart=e=>{ startX=(e.touches?e.touches[0].clientX:e.clientX); dragging=true; }; const onMove=e=>{ if(!dragging) return; const x=(e.touches?e.touches[0].clientX:e.clientX); if(Math.abs(x-startX)>threshold){ show(x<startX?index+1:index-1); dragging=false; } }; const onEnd=()=>{ dragging=false; }; container.addEventListener('mousedown', onStart); container.addEventListener('mousemove', onMove); container.addEventListener('mouseup', onEnd); container.addEventListener('mouseleave', onEnd); container.addEventListener('touchstart', onStart, {passive:true}); container.addEventListener('touchmove', onMove, {passive:true}); container.addEventListener('touchend', onEnd); }
-      function updateDots(){ if(!dots) return; dots.childNodes.forEach((d,i)=> d.className='dot'+(i===index?' active':'')); }
-      const lb=document.getElementById('lightbox'); const lbMedia=document.getElementById('lb-media'); const lbClose=document.querySelector('.lb-close'); const lbL=document.querySelector('.lb-arrow.left'); const lbR=document.querySelector('.lb-arrow.right');
-      function openLightbox(i){ index=i; updateDots(); renderLightbox(media[index]); lb.classList.add('open'); }
-      function renderLightbox(item){ lbMedia.innerHTML=''; if(item.type==='video' || isVideo(item.src)){ const v=document.createElement('video'); v.src=item.src; v.controls=true; v.autoplay=false; v.playsInline=true; lbMedia.appendChild(v); } else { const img=document.createElement('img'); img.src=item.src; lbMedia.appendChild(img); } }
-      function nav(delta){ show(index+delta); if(lb.classList.contains('open')) renderLightbox(media[(index+media.length)%media.length]); }
-      lbClose.onclick=()=> lb.classList.remove('open'); lb.onclick=(e)=>{ if(e.target===lb) lb.classList.remove('open'); }; lbL.onclick=()=> nav(-1); lbR.onclick=()=> nav(1); window.openLightbox = openLightbox;
-    }
-    function qs(k){ return new URLSearchParams(location.search).get(k); }
-    fetch('projects.json').then(r=>r.json()).then(items=>{ const p = items.find(x=>x.slug===slug); if(!p){ document.getElementById('title').textContent='Project not found'; return; } document.getElementById('title').textContent=p.title; document.getElementById('desc').textContent=p.longDescription||'Project description coming soon.'; const tg=document.getElementById('tags'); (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); }); if(p.model){ document.getElementById('mv').setAttribute('src', p.model); } const media=(p.media&&p.media.length)? p.media : ((p.images||[]).map(src=>({type:'image',src})) ); mountMixedSlider(document.getElementById('carousel'), media, 360); });
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Project — Esteban Caicedo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{bg:'#0b1220',card:'#151b2b',ink:'#e6e9f5',mute:'#9aa3b2',brand:{DEFAULT:'#4f6af3',dim:'#4058ca'}},borderRadius:{'2xl':'1.25rem'}}}};</script>
+<style>.slider{position:relative;overflow:hidden}.slide-layer{position:absolute;inset:0;opacity:0;transition:opacity .6s}.slide-layer.active{opacity:1}.slide-layer img,.slide-layer video{width:100%;height:100%;object-fit:cover}
+.ctrl{position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;border-radius:8px;cursor:pointer;opacity:0;pointer-events:none;transition:.2s}
+.slider:hover .ctrl{opacity:1;pointer-events:auto}.ctrl.left{left:8px}.ctrl.right{right:8px}.dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px}.dot{width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.35)}.dot.active{background:#fff}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50}.lightbox.open{display:flex}.lightbox-inner{position:relative;max-width:92vw;max-height:92vh;width:92vw;height:92vh}.lightbox img,.lightbox video{width:100%;height:100%;object-fit:contain;background:#0b0f1a}.lb-close{position:absolute;top:12px;right:12px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer}.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer}.lb-arrow.left{left:12px}.lb-arrow.right{right:12px}</style>
+</head><body class="bg-bg text-ink">
+<header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10"><nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center"><a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a><a class="hover:text-brand text-sm" target="_blank" href="https://www.linkedin.com/in/esteban-caicedo-945bb1300">LinkedIn</a></nav></header>
+<main class="max-w-6xl mx-auto px-6 py-8"><h1 id="title" class="text-3xl font-semibold mb-2"></h1><p id="desc" class="text-mute leading-relaxed mb-3"></p><div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
+<div class="grid md:grid-cols-2 gap-4"><div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden"><div id="carousel" class="slider" style="height:360px"></div></div><div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden"><div id="viewer" style="width:100%;height:360px;background:#0f1525"></div></div></div></main>
+<div id="lightbox" class="lightbox"><div class="lightbox-inner"><span class="lb-close">✕</span><span class="lb-arrow left">‹</span><span class="lb-arrow right">›</span><div id="lb-media"></div></div></div>
+<footer class="border-t border-white/5 mt-16"><div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">© 2025 Esteban Caicedo</div></footer>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/loaders/STLLoader.js"></script>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script>
+const isVideo=src=>/\.(mp4|webm|mov|m4v)$/i.test(src); const qs=k=>new URLSearchParams(location.search).get(k); const slug=qs('slug');
+function mountMixedSlider(container, media, height){container.classList.add('slider');container.style.height=height+'px';const a=document.createElement('div');a.className='slide-layer active';const b=document.createElement('div');b.className='slide-layer';container.append(a,b);function render(layer,item,index){layer.innerHTML='';if(item.type==='video'||isVideo(item.src)){const v=document.createElement('video');v.src=item.src;v.muted=true;v.controls=true;v.preload='metadata';v.playsInline=true;layer.appendChild(v);layer.onclick=()=>openLightbox(index)}else{const img=document.createElement('img');img.src=item.src;layer.appendChild(img);layer.onclick=()=>openLightbox(index)}}let idx=0,useA=true;render(a,media[0]||{type:'image',src:''},0);render(b,media[1]||media[0]||{type:'image',src:''},1);function show(n){idx=(n+media.length)%media.length;const next=media[idx];if(useA){render(b,next,idx);a.classList.remove('active');b.classList.add('active')}else{render(a,next,idx);b.classList.remove('active');a.classList.add('active')}useA=!useA;updateDots()}let dots=null;if(media.length>1){const L=document.createElement('div');L.className='ctrl left';L.textContent='‹';const R=document.createElement('div');R.className='ctrl right';R.textContent='›';dots=document.createElement('div');dots.className='dots';media.forEach((_,i)=>{const d=document.createElement('span');d.className='dot'+(i===0?' active':'');d.onclick=()=>show(i);dots.appendChild(d)});container.append(L,R,dots);L.onclick=()=>show(idx-1);R.onclick=()=>show(idx+1)}};
+function openLightbox(i){index=i;renderLB(media[i]);lb.classList.add('open')}
+const lb=document.getElementById('lightbox');const lbMedia=document.getElementById('lb-media');const lbClose=document.querySelector('.lb-close');const lbL=document.querySelector('.lb-arrow.left');const lbR=document.querySelector('.lb-arrow.right');let index=0, media=[];function renderLB(item){lbMedia.innerHTML='';if(item.type==='video'||isVideo(item.src)){const v=document.createElement('video');v.src=item.src;v.controls=true;v.playsInline=true;lbMedia.appendChild(v)}else{const img=document.createElement('img');img.src=item.src;lbMedia.appendChild(img)}}lbClose.onclick=()=>lb.classList.remove('open');lb.onclick=e=>{if(e.target===lb)lb.classList.remove('open')};lbL.onclick=()=>{index=(index-1+media.length)%media.length;renderLB(media[index])};lbR.onclick=()=>{index=(index+1)%media.length;renderLB(media[index])};
+function mountViewer(container, src){const ext=(src||'').split('.').pop().toLowerCase();if(ext==='stl'){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight,0.1,1000);const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setSize(container.clientWidth, container.clientHeight);container.appendChild(renderer.domElement);const hemi=new THREE.HemisphereLight(0xffffff,0x222233,1.0);scene.add(hemi);const dir=new THREE.DirectionalLight(0xffffff,0.6);dir.position.set(2,2,3);scene.add(dir);camera.position.set(2.5,2,3);const loader=new THREE.STLLoader();loader.load(src, geometry=>{geometry.center();const mat=new THREE.MeshStandardMaterial({color:0xd9e1ff,metalness:0.1,roughness:0.4});const mesh=new THREE.Mesh(geometry,mat);scene.add(mesh)});let isDown=false,prevX=0,prevY=0,rx=0,ry=0;renderer.domElement.addEventListener('mousedown',e=>{isDown=true;prevX=e.clientX;prevY=e.clientY});window.addEventListener('mouseup',()=>isDown=false);window.addEventListener('mousemove',e=>{if(!isDown)return;const dx=(e.clientX-prevX)*0.01;const dy=(e.clientY-prevY)*0.01;scene.rotation.y+=dx;scene.rotation.x+=dy;prevX=e.clientX;prevY=e.clientY});function animate(){requestAnimationFrame(animate);renderer.render(scene,camera)}animate()}else{const mv=document.createElement('model-viewer');mv.setAttribute('src',src);mv.setAttribute('camera-controls','');mv.setAttribute('auto-rotate','');mv.style.width='100%';mv.style.height='360px';mv.style.background='#0f1525';container.appendChild(mv)}}
+fetch('projects.json').then(r=>r.json()).then(items=>{const p=items.find(x=>x.slug===slug)||items[0];document.getElementById('title').textContent=p.title;document.getElementById('desc').textContent=p.longDescription||'';const tg=document.getElementById('tags');(p.tags||[]).forEach(t=>{const s=document.createElement('span');s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10';s.textContent=t;tg.appendChild(s)});media=(p.media||[]);mountMixedSlider(document.getElementById('carousel'), media, 360);mountViewer(document.getElementById('viewer'), p.model)});
+</script>
+</body></html>

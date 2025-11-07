@@ -1,1 +1,228 @@
-[]
+[
+  {
+    "title": "AMET213_Antonov_Surfaces-101",
+    "slug": "AMET213_Antonov_Surfaces-101",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/AMET213_Antonov_Surfaces-101.stl",
+    "media": []
+  },
+  {
+    "title": "Fifth Mill Practice",
+    "slug": "Fifth Mill Practice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Fifth Mill Practice.stl",
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/Fifth Mill Practice1.mp4"
+      },
+      {
+        "type": "video",
+        "src": "assets/Fifth Mill Practice2.mp4"
+      },
+      {
+        "type": "video",
+        "src": "assets/Fifth Mill Practice3.mp4"
+      }
+    ]
+  },
+  {
+    "title": "First Lathe Project",
+    "slug": "First Lathe Project",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/First Lathe Project.stl",
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/First Lathe Project.mp4"
+      }
+    ]
+  },
+  {
+    "title": "First Mill Practice",
+    "slug": "First Mill Practice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/First Mill Practice.stl",
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/First Mill Practice1.mp4"
+      },
+      {
+        "type": "video",
+        "src": "assets/First Mill Practice2.mp4"
+      }
+    ]
+  },
+  {
+    "title": "First Sheetmetal Practice",
+    "slug": "First Sheetmetal Practice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/First Sheetmetal Practice.stl",
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/First Sheetmetal Practice.jpg"
+      }
+    ]
+  },
+  {
+    "title": "Fourth Mill Practice",
+    "slug": "Fourth Mill Practice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Fourth Mill Practice.stl",
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/Fourth Mill Practice.mp4"
+      }
+    ]
+  },
+  {
+    "title": "Landing Gear",
+    "slug": "Landing Gear",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Landing Gear.stl",
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/Landing_Gear_Video.mp4"
+      }
+    ]
+  },
+  {
+    "title": "Linkage",
+    "slug": "Linkage",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Linkage.stl",
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/Linkage1.png"
+      },
+      {
+        "type": "image",
+        "src": "assets/Linkage2.png"
+      }
+    ]
+  },
+  {
+    "title": "MOUSE",
+    "slug": "MOUSE",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/MOUSE.stl",
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/Mouse.png"
+      }
+    ]
+  },
+  {
+    "title": "NOSE_LANDING_GEAR-504",
+    "slug": "NOSE_LANDING_GEAR-504",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/NOSE_LANDING_GEAR-504.stl",
+    "media": []
+  },
+  {
+    "title": "Second Mill Pracice",
+    "slug": "Second Mill Pracice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Second Mill Pracice.stl",
+    "media": []
+  },
+  {
+    "title": "Second Sheetmetal Practice",
+    "slug": "Second Sheetmetal Practice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Second Sheetmetal Practice.stl",
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/Second Sheetmetal Practice.jpg"
+      }
+    ]
+  },
+  {
+    "title": "Third Mill Practice",
+    "slug": "Third Mill Practice",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Third Mill Practice.stl",
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/Third Mill Practice1.mp4"
+      },
+      {
+        "type": "video",
+        "src": "assets/Third Mill Practice2.mp4"
+      }
+    ]
+  }
+]
