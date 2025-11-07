@@ -1,8 +1,4 @@
-# Portfolio V2.2 — Dark + Project Details + 3D in detail page
-
-- Cards show the first image from `images[]` as preview.
-- Clicking a card opens `project.html?slug=...` which renders:
-  - Big 3D viewer (if `model` is provided),
-  - Image gallery,
-  - Long description.
-- Add more images by saving them in /assets and appending paths to the project's `images` array.
+# Portfolio V2.2.1 — Detail pages + Airplane images
+- Cards show first image as preview.
+- `project.html?slug=...` shows 3D viewer, gallery, and long description.
+- Added Airplane renders to `assets/airplane_1.jpg..3.jpg` and listed in `projects.json`.

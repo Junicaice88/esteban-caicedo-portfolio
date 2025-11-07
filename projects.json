@@ -2,7 +2,7 @@
   {
     "title": "Airplane Model",
     "slug": "airplane-model",
-    "description": "Interactive 3D airplane assembly view with gallery.",
+    "description": "Concept single-engine light aircraft model \u2014 3D viewer and renders.",
     "longDescription": "WIP \u2014 Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
     "tags": [
       "CAD",
@@ -10,6 +10,9 @@
       "3D"
     ],
     "images": [
+      "assets/airplane_1.jpg",
+      "assets/airplane_2.jpg",
+      "assets/airplane_3.jpg",
       "assets/airplane_poster.jpg"
     ],
     "model": "assets/models/AIR_PLANE_CLEAN.glb",
