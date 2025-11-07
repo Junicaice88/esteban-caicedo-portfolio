@@ -1,27 +1,189 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Project — Esteban Caicedo</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{colors:{bg:'#0b1220',card:'#151b2b',ink:'#e6e9f5',mute:'#9aa3b2',brand:{DEFAULT:'#4f6af3',dim:'#4058ca'}},borderRadius:{'2xl':'1.25rem'}}}};</script>
-<style>.slider{position:relative;overflow:hidden}.slide-layer{position:absolute;inset:0;opacity:0;transition:opacity .6s}.slide-layer.active{opacity:1}.slide-layer img,.slide-layer video{width:100%;height:100%;object-fit:cover}
-.ctrl{position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;border-radius:8px;cursor:pointer;opacity:0;pointer-events:none;transition:.2s}
-.slider:hover .ctrl{opacity:1;pointer-events:auto}.ctrl.left{left:8px}.ctrl.right{right:8px}.dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px}.dot{width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.35)}.dot.active{background:#fff}
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50}.lightbox.open{display:flex}.lightbox-inner{position:relative;max-width:92vw;max-height:92vh;width:92vw;height:92vh}.lightbox img,.lightbox video{width:100%;height:100%;object-fit:contain;background:#0b0f1a}.lb-close{position:absolute;top:12px;right:12px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer}.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer}.lb-arrow.left{left:12px}.lb-arrow.right{right:12px}</style>
-</head><body class="bg-bg text-ink">
-<header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10"><nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center"><a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a><a class="hover:text-brand text-sm" target="_blank" href="https://www.linkedin.com/in/esteban-caicedo-945bb1300">LinkedIn</a></nav></header>
-<main class="max-w-6xl mx-auto px-6 py-8"><h1 id="title" class="text-3xl font-semibold mb-2"></h1><p id="desc" class="text-mute leading-relaxed mb-3"></p><div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
-<div class="grid md:grid-cols-2 gap-4"><div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden"><div id="carousel" class="slider" style="height:360px"></div></div><div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden"><div id="viewer" style="width:100%;height:360px;background:#0f1525"></div></div></div></main>
-<div id="lightbox" class="lightbox"><div class="lightbox-inner"><span class="lb-close">✕</span><span class="lb-arrow left">‹</span><span class="lb-arrow right">›</span><div id="lb-media"></div></div></div>
-<footer class="border-t border-white/5 mt-16"><div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">© 2025 Esteban Caicedo</div></footer>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/loaders/STLLoader.js"></script>
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Project • Esteban Caicedo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/three@0.160.1/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.1/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/three@0.160.1/examples/js/loaders/STLLoader.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    :root{color-scheme: dark;}
+    html,body{background:#0b1322;color:#e6edf3}
+    .card{background:#0f172a;border:1px solid rgba(255,255,255,.08)}
+    .fade-slide{position:relative;overflow:hidden;border-radius:16px}
+    .fade-slide > *{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+    .fade-slide > *.active{opacity:1}
+    .dot{width:.5rem;height:.5rem;border-radius:9999px;background:rgba(255,255,255,.25)}
+    .dot.active{background:white}
+  </style>
+</head>
+<body>
+  <header class="max-w-6xl mx-auto px-5 py-6 flex items-center justify-between">
+    <a class="text-xl font-semibold text-blue-300" href="./">Esteban Caicedo</a>
+    <a class="text-sm text-slate-300 hover:text-white" href="./#projects">← Back</a>
+  </header>
+  <main class="max-w-6xl mx-auto px-5 pb-24" id="root"></main>
+
+  <div id="lightbox" class="fixed inset-0 bg-black/80 z-50 hidden">
+    <button id="closeLb" class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-3 py-1.5">Close</button>
+    <div class="w-full h-full flex items-center justify-center p-4">
+      <div id="lbInner" class="max-w-5xl w-full"></div>
+    </div>
+  </div>
+
 <script>
-const isVideo=src=>/\.(mp4|webm|mov|m4v)$/i.test(src); const qs=k=>new URLSearchParams(location.search).get(k); const slug=qs('slug');
-function mountMixedSlider(container, media, height){container.classList.add('slider');container.style.height=height+'px';const a=document.createElement('div');a.className='slide-layer active';const b=document.createElement('div');b.className='slide-layer';container.append(a,b);function render(layer,item,index){layer.innerHTML='';if(item.type==='video'||isVideo(item.src)){const v=document.createElement('video');v.src=item.src;v.muted=true;v.controls=true;v.preload='metadata';v.playsInline=true;layer.appendChild(v);layer.onclick=()=>openLightbox(index)}else{const img=document.createElement('img');img.src=item.src;layer.appendChild(img);layer.onclick=()=>openLightbox(index)}}let idx=0,useA=true;render(a,media[0]||{type:'image',src:''},0);render(b,media[1]||media[0]||{type:'image',src:''},1);function show(n){idx=(n+media.length)%media.length;const next=media[idx];if(useA){render(b,next,idx);a.classList.remove('active');b.classList.add('active')}else{render(a,next,idx);b.classList.remove('active');a.classList.add('active')}useA=!useA;updateDots()}let dots=null;if(media.length>1){const L=document.createElement('div');L.className='ctrl left';L.textContent='‹';const R=document.createElement('div');R.className='ctrl right';R.textContent='›';dots=document.createElement('div');dots.className='dots';media.forEach((_,i)=>{const d=document.createElement('span');d.className='dot'+(i===0?' active':'');d.onclick=()=>show(i);dots.appendChild(d)});container.append(L,R,dots);L.onclick=()=>show(idx-1);R.onclick=()=>show(idx+1)}};
-function openLightbox(i){index=i;renderLB(media[i]);lb.classList.add('open')}
-const lb=document.getElementById('lightbox');const lbMedia=document.getElementById('lb-media');const lbClose=document.querySelector('.lb-close');const lbL=document.querySelector('.lb-arrow.left');const lbR=document.querySelector('.lb-arrow.right');let index=0, media=[];function renderLB(item){lbMedia.innerHTML='';if(item.type==='video'||isVideo(item.src)){const v=document.createElement('video');v.src=item.src;v.controls=true;v.playsInline=true;lbMedia.appendChild(v)}else{const img=document.createElement('img');img.src=item.src;lbMedia.appendChild(img)}}lbClose.onclick=()=>lb.classList.remove('open');lb.onclick=e=>{if(e.target===lb)lb.classList.remove('open')};lbL.onclick=()=>{index=(index-1+media.length)%media.length;renderLB(media[index])};lbR.onclick=()=>{index=(index+1)%media.length;renderLB(media[index])};
-function mountViewer(container, src){const ext=(src||'').split('.').pop().toLowerCase();if(ext==='stl'){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight,0.1,1000);const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setSize(container.clientWidth, container.clientHeight);container.appendChild(renderer.domElement);const hemi=new THREE.HemisphereLight(0xffffff,0x222233,1.0);scene.add(hemi);const dir=new THREE.DirectionalLight(0xffffff,0.6);dir.position.set(2,2,3);scene.add(dir);camera.position.set(2.5,2,3);const loader=new THREE.STLLoader();loader.load(src, geometry=>{geometry.center();const mat=new THREE.MeshStandardMaterial({color:0xd9e1ff,metalness:0.1,roughness:0.4});const mesh=new THREE.Mesh(geometry,mat);scene.add(mesh)});let isDown=false,prevX=0,prevY=0,rx=0,ry=0;renderer.domElement.addEventListener('mousedown',e=>{isDown=true;prevX=e.clientX;prevY=e.clientY});window.addEventListener('mouseup',()=>isDown=false);window.addEventListener('mousemove',e=>{if(!isDown)return;const dx=(e.clientX-prevX)*0.01;const dy=(e.clientY-prevY)*0.01;scene.rotation.y+=dx;scene.rotation.x+=dy;prevX=e.clientX;prevY=e.clientY});function animate(){requestAnimationFrame(animate);renderer.render(scene,camera)}animate()}else{const mv=document.createElement('model-viewer');mv.setAttribute('src',src);mv.setAttribute('camera-controls','');mv.setAttribute('auto-rotate','');mv.style.width='100%';mv.style.height='360px';mv.style.background='#0f1525';container.appendChild(mv)}}
-fetch('projects.json').then(r=>r.json()).then(items=>{const p=items.find(x=>x.slug===slug)||items[0];document.getElementById('title').textContent=p.title;document.getElementById('desc').textContent=p.longDescription||'';const tg=document.getElementById('tags');(p.tags||[]).forEach(t=>{const s=document.createElement('span');s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10';s.textContent=t;tg.appendChild(s)});media=(p.media||[]);mountMixedSlider(document.getElementById('carousel'), media, 360);mountViewer(document.getElementById('viewer'), p.model)});
+const qs = new URLSearchParams(location.search);
+const slug = qs.get('slug');
+const root = document.getElementById('root');
+
+const lightbox = document.getElementById('lightbox');
+const lbInner = document.getElementById('lbInner');
+document.getElementById('closeLb').onclick = ()=>{ lightbox.classList.add('hidden'); lbInner.innerHTML=''; }
+
+function openLightbox(item){
+  lbInner.innerHTML='';
+  if(item.type==='image'){
+    const img = new Image();
+    img.src=item.src; img.className='w-full h-auto rounded-xl';
+    lbInner.appendChild(img);
+  }else{
+    const vid=document.createElement('video');
+    vid.src=item.src; vid.controls=true; vid.autoplay=true; vid.className='w-full h-auto rounded-xl';
+    lbInner.appendChild(vid);
+  }
+  lightbox.classList.remove('hidden');
+}
+
+function buildCarousel(media){
+  const wrap=document.createElement('div');
+  wrap.className='relative fade-slide aspect-[16/10] rounded-2xl overflow-hidden border border-white/10';
+  const dots=document.createElement('div');
+  dots.className='absolute left-1/2 -translate-x-1/2 bottom-2 flex gap-1.5 z-10';
+  media.forEach((m,i)=>{
+    let node;
+    if(m.type==='image'){
+      node=new Image(); node.src=m.src; node.className='w-full h-full object-cover'; node.dataset.idx=i;
+    }else{
+      node=document.createElement('video');
+      node.src=m.src; node.muted=true; node.loop=true; node.playsInline=true; node.dataset.idx=i;
+      node.className='w-full h-full object-cover';
+      node.oncanplay=()=>node.play().catch(()=>{});
+      const pill=document.createElement('div');
+      pill.className='absolute right-2 bottom-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full border border-white/20';
+      pill.textContent='Play';
+      pill.onclick=(e)=>{e.stopPropagation(); openLightbox(m);};
+      wrap.appendChild(pill);
+      node.addEventListener('click',(e)=>{e.stopPropagation(); openLightbox(m);});
+    }
+    wrap.appendChild(node);
+    const d=document.createElement('button'); d.className='dot'; d.dataset.idx=i; d.onclick=(e)=>{e.stopPropagation(); show(+e.currentTarget.dataset.idx);}; dots.appendChild(d);
+  });
+  wrap.appendChild(dots);
+
+  let i=0,timer;
+  const nodes=[...wrap.querySelectorAll('[data-idx]')];
+  const dotEls=[...dots.querySelectorAll('.dot')];
+  function show(n){
+    i=(n+nodes.length)%nodes.length;
+    nodes.forEach(el=>el.classList.remove('active'));
+    dotEls.forEach(el=>el.classList.remove('active'));
+    nodes[i].classList.add('active'); dotEls[i].classList.add('active');
+  }
+  function start(){ timer=setInterval(()=>show(i+1),3500); }
+  function stop(){ if(timer) clearInterval(timer); }
+  wrap.addEventListener('mouseenter', stop);
+  wrap.addEventListener('mouseleave', start);
+  wrap.addEventListener('click', ()=> openLightbox(media[i]));
+  show(0); start();
+  return wrap;
+}
+
+function stlViewer(container, url){
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0b1322);
+  const camera=new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 1000);
+  camera.position.set(3,2.2,3.8);
+
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(devicePixelRatio);
+  container.appendChild(renderer.domElement);
+
+  const controls=new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping=true;
+
+  const hemi=new THREE.HemisphereLight(0xffffff,0x223,0.9); scene.add(hemi);
+  const dir=new THREE.DirectionalLight(0xffffff,0.9); dir.position.set(5,10,8); scene.add(dir);
+
+  const loader=new THREE.STLLoader();
+  loader.load(url, geo=>{
+    geo.computeVertexNormals();
+    const mat=new THREE.MeshPhysicalMaterial({color:0x9bbcff, metalness:0.2, roughness:0.35});
+    const mesh=new THREE.Mesh(geo, mat);
+    geo.computeBoundingBox();
+    const box=geo.boundingBox;
+    const size=new THREE.Vector3(); box.getSize(size);
+    const maxSide=Math.max(size.x,size.y,size.z);
+    const s=1/maxSide; mesh.scale.setScalar(s*2.2);
+    geo.computeBoundingSphere();
+    mesh.position.set(0,0,0);
+    mesh.castShadow=true; mesh.receiveShadow=true;
+    scene.add(mesh);
+  });
+
+  function onResize(){
+    const w=container.clientWidth, h=container.clientHeight;
+    camera.aspect=w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  }
+  window.addEventListener('resize', onResize);
+
+  (function render(){ requestAnimationFrame(render); controls.update(); renderer.render(scene,camera); })();
+}
+
+fetch('projects.json').then(r=>r.json()).then(items=>{
+  const p=items.find(x=>x.slug===slug);
+  if(!p){ document.getElementById('root').innerHTML='<p class="text-slate-300">Project not found.</p>'; return; }
+
+  const descHTML = `
+    <h1 class="text-2xl sm:text-3xl font-semibold">${p.title}</h1>
+    <p class="mt-2 text-slate-300">${p.longDescription || p.description || 'Project description coming soon.'}</p>
+    <div class="mt-3 flex flex-wrap gap-2">
+      ${(p.tags||[]).map(t=>`<span class="text-xs px-2 py-1 rounded-full border border-white/15 bg-white/5">${t}</span>`).join('')}
+    </div>
+  `;
+
+  const mediaCarousel = buildCarousel(p.media && p.media.length ? p.media : []);
+  const isGLB = /\.glb$/i.test(p.model||'');
+  const isSTL = /\.stl$/i.test(p.model||'');
+
+  let modelHTML='';
+  if(isGLB){
+    modelHTML = `<model-viewer src="${p.model}" camera-controls auto-rotate style="width:100%;height:100%;background:#0b1322;border-radius:16px;border:1px solid rgba(255,255,255,.08)"></model-viewer>`;
+  } else if(isSTL){
+    modelHTML = `<div id="stlHost" class="w-full h-full rounded-2xl border border-white/10"></div>`;
+  } else {
+    modelHTML = `<div class="w-full h-full rounded-2xl border border-white/10 flex items-center justify-center text-slate-400">No model</div>`;
+  }
+
+  document.getElementById('root').innerHTML = `
+    <div class="mb-6">${descHTML}</div>
+    <div class="grid md:grid-cols-2 gap-6 items-start">
+      <div class="min-h-[360px] md:min-h-[420px]">${modelHTML}</div>
+      <div class="min-h-[360px] md:min-h-[420px]">${mediaCarousel.outerHTML}</div>
+    </div>
+  `;
+
+  if(isSTL){
+    const host=document.getElementById('stlHost');
+    stlViewer(host, p.model);
+  }
+}).catch(err=>{
+  document.getElementById('root').innerHTML = `<p class="text-slate-300">Failed to load project.<br>${err}</p>`;
+});
 </script>
-</body></html>
+</body>
+</html>

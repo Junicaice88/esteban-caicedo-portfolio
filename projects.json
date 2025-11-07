@@ -1,17 +1,5 @@
 [
   {
-    "title": "AMET213_Antonov_Surfaces-101",
-    "slug": "AMET213_Antonov_Surfaces-101",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/AMET213_Antonov_Surfaces-101.stl",
-    "media": []
-  },
-  {
     "title": "Fifth Mill Practice",
     "slug": "Fifth Mill Practice",
     "description": "",
@@ -20,21 +8,8 @@
       "CAD",
       "3D"
     ],
-    "model": "assets/models/Fifth Mill Practice.stl",
-    "media": [
-      {
-        "type": "video",
-        "src": "assets/Fifth Mill Practice1.mp4"
-      },
-      {
-        "type": "video",
-        "src": "assets/Fifth Mill Practice2.mp4"
-      },
-      {
-        "type": "video",
-        "src": "assets/Fifth Mill Practice3.mp4"
-      }
-    ]
+    "model": "assets/models/Fifth Mill Practice.STL",
+    "media": []
   },
   {
     "title": "First Lathe Project",
@@ -63,16 +38,7 @@
       "3D"
     ],
     "model": "assets/models/First Mill Practice.stl",
-    "media": [
-      {
-        "type": "video",
-        "src": "assets/First Mill Practice1.mp4"
-      },
-      {
-        "type": "video",
-        "src": "assets/First Mill Practice2.mp4"
-      }
-    ]
+    "media": []
   },
   {
     "title": "First Sheetmetal Practice",
@@ -100,7 +66,7 @@
       "CAD",
       "3D"
     ],
-    "model": "assets/models/Fourth Mill Practice.stl",
+    "model": "assets/models/Fourth Mill Practice.STL",
     "media": [
       {
         "type": "video",
@@ -118,12 +84,7 @@
       "3D"
     ],
     "model": "assets/models/Landing Gear.stl",
-    "media": [
-      {
-        "type": "video",
-        "src": "assets/Landing_Gear_Video.mp4"
-      }
-    ]
+    "media": []
   },
   {
     "title": "Linkage",
@@ -135,44 +96,6 @@
       "3D"
     ],
     "model": "assets/models/Linkage.stl",
-    "media": [
-      {
-        "type": "image",
-        "src": "assets/Linkage1.png"
-      },
-      {
-        "type": "image",
-        "src": "assets/Linkage2.png"
-      }
-    ]
-  },
-  {
-    "title": "MOUSE",
-    "slug": "MOUSE",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/MOUSE.stl",
-    "media": [
-      {
-        "type": "image",
-        "src": "assets/Mouse.png"
-      }
-    ]
-  },
-  {
-    "title": "NOSE_LANDING_GEAR-504",
-    "slug": "NOSE_LANDING_GEAR-504",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/NOSE_LANDING_GEAR-504.stl",
     "media": []
   },
   {
@@ -184,7 +107,7 @@
       "CAD",
       "3D"
     ],
-    "model": "assets/models/Second Mill Pracice.stl",
+    "model": "assets/models/Second Mill Pracice.STL",
     "media": []
   },
   {
@@ -213,15 +136,52 @@
       "CAD",
       "3D"
     ],
-    "model": "assets/models/Third Mill Practice.stl",
+    "model": "assets/models/Third Mill Practice.STL",
+    "media": []
+  },
+  {
+    "title": "Antonov",
+    "slug": "Antonov",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Antonov.stl",
+    "media": []
+  },
+  {
+    "title": "Mouse",
+    "slug": "Mouse",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Mouse.stl",
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/Mouse.png"
+      }
+    ]
+  },
+  {
+    "title": "Nose_Landing_Gear",
+    "slug": "Nose_Landing_Gear",
+    "description": "",
+    "longDescription": "",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/Nose_Landing_Gear.stl",
     "media": [
       {
         "type": "video",
-        "src": "assets/Third Mill Practice1.mp4"
-      },
-      {
-        "type": "video",
-        "src": "assets/Third Mill Practice2.mp4"
+        "src": "assets/Nose_Landing_Gear.mp4"
       }
     ]
   }
