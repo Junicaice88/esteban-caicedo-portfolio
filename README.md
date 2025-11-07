@@ -1,11 +1,6 @@
-# Esteban Caicedo — Portfolio (V2 Dark)
+# Esteban Caicedo — Portfolio (V2.1.1 Dark + 3D)
 
-Dark theme, extended portfolio with About, Projects (filters), Experience, Education & Certifications.
+This version fixes the JS rendering and includes <model-viewer> 3D integration.
 
-## How to deploy
-- Replace your repo files with this folder content and commit to `main`.
-- Netlify will auto-redeploy. Publish directory stays as `.` and no build command is required.
-
-## Edit content
-- `projects.json`: add/edit projects (image in `assets/`).
-- `index.html`: update About, Experience, and Education/Certs text blocks.
+Deploy: push all files to GitHub, Netlify auto-redeploys.
+Edit: update About/Experience in index.html and projects in projects.json.
