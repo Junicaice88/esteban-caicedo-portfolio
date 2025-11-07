@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Project — Esteban Caicedo</title>
+  <title>Project — Lightbox + Video</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,123 +14,120 @@
   <style>
     .slider { position: relative; overflow: hidden; }
     .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
-    .slide-layer img { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
     .slide-layer.active { opacity:1; }
+    .slide-layer img, .slide-layer video { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
     .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
     .ctrl.left { left:8px; } .ctrl.right { right:8px; }
     .slider:hover .ctrl { opacity:1; pointer-events:auto; }
     .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
     .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
     .dot.active { background: white; }
+    .play-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .play-btn { width:64px; height:64px; border-radius:9999px; background:rgba(0,0,0,.45); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 16px rgba(0,0,0,.3); }
+    .play-btn::before { content:'▶'; margin-left:4px; }
+    .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:50; }
+    .lightbox.open { display:flex; }
+    .lightbox-inner { position:relative; max-width:92vw; max-height:92vh; width:92vw; height:92vh; }
+    .lightbox img, .lightbox video { width:100%; height:100%; object-fit:contain; background:#0b0f1a; }
+    .lb-close { position:absolute; top:12px; right:12px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
+    .lb-arrow { position:absolute; top:50%; transform:translateY(-50%); padding:10px 12px; border-radius:10px; background:rgba(0,0,0,.55); color:white; cursor:pointer; }
+    .lb-arrow.left { left:12px; } .lb-arrow.right { right:12px; }
   </style>
 
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body class="bg-bg text-ink font-sans">
-  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
-    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a>
-      <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand text-sm">LinkedIn</a>
-    </nav>
-  </header>
-
   <main class="max-w-6xl mx-auto px-6 py-8">
-    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
-    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
-    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
-
+    <h1 class="text-3xl font-semibold mb-2">Sample Project</h1>
+    <p class="text-mute mb-6">Mixed-media carousel with images, videos, play button overlay, swipe/drag, and fullscreen lightbox.</p>
     <div class="grid md:grid-cols-2 gap-4">
       <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
-      </div>
-      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
         <div id="carousel" class="slider" style="height:360px"></div>
+      </div>
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden p-6 flex items-center justify-center text-mute">
+        <div>3D viewer placeholder</div>
       </div>
     </div>
   </main>
 
-  <footer class="border-t border-white/5 mt-16">
-    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">
-      © 2025 Esteban Caicedo
+  <div id="lightbox" class="lightbox">
+    <div class="lightbox-inner">
+      <span class="lb-close">✕</span>
+      <span class="lb-arrow left">‹</span>
+      <span class="lb-arrow right">›</span>
+      <div id="lb-media"></div>
     </div>
-  </footer>
+  </div>
 
   <script>
-    function mountSlider(container, images, height){
-      container.classList.add('slider');
-      container.style.height = height + 'px';
+    const media = [
+      {type:'image', src:'assets/demo1.jpg'},
+      {type:'video', src:'assets/demo.mp4'},
+      {type:'image', src:'assets/demo2.jpg'}
+    ];
+    const isVideo = (src)=> /\.mp4$|\.webm$/i.test(src);
 
+    function mountMixedSlider(container, media, height){
+      container.classList.add('slider'); container.style.height = height + 'px';
       const a = document.createElement('div'); a.className='slide-layer active';
       const b = document.createElement('div'); b.className='slide-layer';
-      const imgA = document.createElement('img'); const imgB = document.createElement('img');
-      imgA.src = images[0] || ''; imgB.src = images[1] || images[0] || '';
-      a.appendChild(imgA); b.appendChild(imgB);
       container.append(a,b);
 
-      let idx = 0, useA = true;
+      function renderLayer(layer, item){
+        layer.innerHTML='';
+        if(item.type==='video' || isVideo(item.src)){
+          const v=document.createElement('video'); v.src=item.src; v.muted=true; v.controls=true; v.preload='metadata'; v.playsInline=true; layer.appendChild(v);
+          const overlay=document.createElement('div'); overlay.className='play-overlay'; const btn=document.createElement('div'); btn.className='play-btn'; overlay.appendChild(btn); layer.appendChild(overlay);
+          btn.onclick=(e)=>{ e.stopPropagation(); if(v.paused) v.play(); else v.pause(); };
+          layer.onclick=()=> openLightbox(index);
+        } else {
+          const img=document.createElement('img'); img.src=item.src; layer.appendChild(img);
+          layer.onclick=()=> openLightbox(index);
+        }
+      }
+
+      let index=0, useA=true;
+      renderLayer(a, media[0]||{type:'image',src:''});
+      renderLayer(b, media[1]||media[0]||{type:'image',src:''});
 
       function show(n){
-        idx = (n+images.length)%images.length;
-        const nextSrc = images[idx];
-        if(useA){ imgB.src = nextSrc; a.classList.remove('active'); b.classList.add('active'); }
-        else   { imgA.src = nextSrc; b.classList.remove('active'); a.classList.add('active'); }
-        useA = !useA;
-        updateDots();
+        index = (n+media.length)%media.length;
+        const next = media[index];
+        if(useA){ renderLayer(b,next); a.classList.remove('active'); b.classList.add('active'); }
+        else { renderLayer(a,next); b.classList.remove('active'); a.classList.add('active'); }
+        useA=!useA; updateDots();
       }
 
-      let dots = null;
-      function updateDots(){
-        if(!dots) return;
-        dots.childNodes.forEach((d,k)=> d.className='dot'+(k===idx?' active':''));
-      }
-
-      if(images.length > 1){
-        const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
-        const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
-        dots = document.createElement('div'); dots.className='dots';
-        images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
+      let dots=null;
+      if(media.length>1){
+        const left=document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+        const right=document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+        dots=document.createElement('div'); dots.className='dots';
+        media.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
         container.append(left,right,dots);
-        left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
+        left.onclick=()=>show(index-1); right.onclick=()=>show(index+1);
 
-        // Swipe/drag
-        let startX = null, dragging = false;
-        const threshold = 40;
-        const onStart = e => { startX = (e.touches? e.touches[0].clientX : e.clientX); dragging = true; };
-        const onMove = e => {
-          if(!dragging) return;
-          const x = (e.touches? e.touches[0].clientX : e.clientX);
-          if (Math.abs(x - startX) > threshold){
-            set(x < startX ? idx+1 : idx-1);
-            dragging = false;
-          }
-        };
-        const onEnd = () => { dragging = false; };
-        container.addEventListener('mousedown', onStart);
-        container.addEventListener('mousemove', onMove);
-        container.addEventListener('mouseup', onEnd);
-        container.addEventListener('mouseleave', onEnd);
-        container.addEventListener('touchstart', onStart, {passive:true});
-        container.addEventListener('touchmove', onMove, {passive:true});
-        container.addEventListener('touchend', onEnd);
-
+        let startX=null, dragging=false; const threshold=40;
+        const onStart=e=>{ startX=(e.touches?e.touches[0].clientX:e.clientX); dragging=true; };
+        const onMove=e=>{ if(!dragging) return; const x=(e.touches?e.touches[0].clientX:e.clientX); if(Math.abs(x-startX)>threshold){ show(x<startX?index+1:index-1); dragging=false; } };
+        const onEnd=()=>{ dragging=false; };
+        container.addEventListener('mousedown', onStart); container.addEventListener('mousemove', onMove); container.addEventListener('mouseup', onEnd); container.addEventListener('mouseleave', onEnd);
+        container.addEventListener('touchstart', onStart, {passive:true}); container.addEventListener('touchmove', onMove, {passive:true}); container.addEventListener('touchend', onEnd);
       }
+
+      function updateDots(){ if(!dots) return; dots.childNodes.forEach((d,i)=> d.className='dot'+(i===index?' active':'')); }
+
+      const lb=document.getElementById('lightbox'); const lbMedia=document.getElementById('lb-media');
+      const lbClose=document.querySelector('.lb-close'); const lbL=document.querySelector('.lb-arrow.left'); const lbR=document.querySelector('.lb-arrow.right');
+      function openLightbox(i){ index=i; updateDots(); renderLightbox(media[index]); lb.classList.add('open'); }
+      function renderLightbox(item){ lbMedia.innerHTML=''; if(item.type==='video' || isVideo(item.src)){ const v=document.createElement('video'); v.src=item.src; v.controls=true; v.autoplay=false; v.playsInline=true; lbMedia.appendChild(v); } else { const img=document.createElement('img'); img.src=item.src; lbMedia.appendChild(img); } }
+      function nav(delta){ show(index+delta); if(lb.classList.contains('open')) renderLightbox(media[(index+media.length)%media.length]); }
+      lbClose.onclick=()=> lb.classList.remove('open');
+      lb.onclick=(e)=>{ if(e.target===lb) lb.classList.remove('open'); };
+      lbL.onclick=()=> nav(-1); lbR.onclick=()=> nav(1);
+      window.openLightbox = openLightbox;
     }
 
-    function qs(k){return new URLSearchParams(location.search).get(k);}
-    const slug = qs('slug');
-
-    fetch('projects.json').then(r=>r.json()).then(items=>{
-      const p = items.find(x=>x.slug===slug);
-      if(!p){ document.getElementById('title').textContent='Project not found'; return; }
-
-      document.getElementById('title').textContent = p.title;
-      document.getElementById('desc').textContent = p.longDescription || 'Project description coming soon.';
-      const tg = document.getElementById('tags');
-      (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); });
-      if(p.model){ document.getElementById('mv').setAttribute('src', p.model); }
-      const imgs = (p.images && p.images.length)? p.images : (p.image? [p.image]:[]);
-      mountSlider(document.getElementById('carousel'), imgs, 360);
-    });
+    mountMixedSlider(document.getElementById('carousel'), [{type:'image',src:'assets/demo1.jpg'},{type:'video',src:'assets/demo.mp4'},{type:'image',src:'assets/demo2.jpg'}], 360);
   </script>
 </body>
 </html>
