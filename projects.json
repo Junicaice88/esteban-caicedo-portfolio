@@ -12,11 +12,9 @@
     "images": [
       "assets/airplane_1.jpg",
       "assets/airplane_2.jpg",
-      "assets/airplane_3.jpg",
-      "assets/airplane_poster.jpg"
+      "assets/airplane_3.jpg"
     ],
-    "model": "assets/models/AIR_PLANE_CLEAN.glb",
-    "link": ""
+    "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
   {
     "title": "C-Bond Composite Panels",

@@ -12,13 +12,14 @@
     }}};
   </script>
   <style>
-    .slider { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .slider { position: relative; overflow: hidden; }
     .slider img { width: 100%; height: 100%; object-fit: cover; display:block; }
-    .slider-dots { position: absolute; bottom: 8px; left: 0; right: 0; display:flex; justify-content:center; gap:6px; }
+    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
+    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
+    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
+    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
     .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
     .dot.active { background: white; }
-    .arrow { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.35); color:white; border-radius:8px; cursor:pointer; user-select:none; }
-    .arrow.left { left:8px; } .arrow.right { right:8px; }
   </style>
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
@@ -32,7 +33,18 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-6 py-8">
-    <div id="content" class="space-y-6"></div>
+    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
+    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
+    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
+      </div>
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <div id="carousel" class="slider" style="height:360px"></div>
+      </div>
+    </div>
   </main>
 
   <footer class="border-t border-white/5 mt-16">
@@ -42,83 +54,43 @@
   </footer>
 
   <script>
-    function qs(name){ return new URLSearchParams(location.search).get(name); }
-    const slug = qs('slug');
-    const root = document.getElementById('content');
+    function mountSlider(container, images, height){
+      container.classList.add('slider');
+      container.style.height = height + 'px';
+      const img = document.createElement('img');
+      img.alt = '';
+      img.src = images[0] || '';
+      container.appendChild(img);
 
-    function buildCarousel(images){
-      const id = 'carousel_' + Math.random().toString(36).slice(2);
-      const first = images[0] || '';
-      return `
-        <div class="slider rounded-2xl border border-white/5" id="${id}" style="height:380px">
-          ${first ? `<img src="${first}" alt="">` : ''}
-          <div class="arrow left">‹</div>
-          <div class="arrow right">›</div>
-          <div class="slider-dots">${images.map((_,i)=>`<span class='dot ${i===0?'active':''}'></span>`).join('')}</div>
-        </div>
-        <script>
-          (function(){
-            const el = document.getElementById('${id}');
-            const img = el.querySelector('img');
-            const dots = el.querySelectorAll('.dot');
-            const left = el.querySelector('.left'); const right = el.querySelector('.right');
-            const imgs = ${JSON.stringify([])}.concat(${json.dumps([])}); // placeholder to avoid escaping
-          })();
-        </script>
-      `;
+      if(images.length > 1){
+        const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+        const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+        const dots = document.createElement('div'); dots.className='dots';
+        const dotEls = images.map((_,i)=>{
+          const d = document.createElement('span'); d.className='dot' + (i===0?' active':'');
+          dots.appendChild(d); return d;
+        });
+        container.append(left,right,dots);
+        let idx = 0;
+        function set(n){ idx=(n+images.length)%images.length; img.src=images[idx]; dotEls.forEach((d,i)=>d.classList.toggle('active',i===idx)); }
+        left.onclick=()=>set(idx-1); right.onclick=()=>set(idx+1);
+      }
     }
 
+    function qs(k){return new URLSearchParams(location.search).get(k);}
+    const slug = qs('slug');
+
     fetch('projects.json').then(r=>r.json()).then(items=>{
-      const p = items.find(x => x.slug === slug);
-      if(!p){ root.innerHTML = '<p class="text-mute">Project not found.</p>'; return; }
-      const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+      const p = items.find(x=>x.slug===slug);
+      if(!p){ document.getElementById('title').textContent='Project not found'; return; }
 
-      // Build description first
-      const descHTML = `
-        <h1 class="text-3xl font-semibold">${p.title}</h1>
-        <p class="text-mute leading-relaxed">${p.longDescription || "Project description coming soon."}</p>
-        <div class="text-mute flex flex-wrap gap-2 mt-3">
-          ${p.tags.map(t => `<span class="text-xs px-2 py-1 rounded bg-white/5 border border-white/10">${t}</span>`).join('')}
-        </div>
-      `;
-
-      // Side by side: model and carousel
-      const bodyHTML = `
-        <div class="grid md:grid-cols-2 gap-4">
-          <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-            ${p.model ? `<model-viewer src="${p.model}" camera-controls auto-rotate style="width:100%;height:380px;background:#0f1525;"></model-viewer>` : ''}
-          </div>
-          <div>
-            <div class="slider rounded-2xl border border-white/5" style="height:380px" data-images='${JSON.stringify(images)}'>
-              ${images[0] ? `<img src="${images[0]}" alt="">` : ''}
-              <div class="arrow left">‹</div>
-              <div class="arrow right">›</div>
-              <div class="slider-dots">${images.map((_,i)=>`<span class='dot ${i===0?'active':''}'></span>`).join('')}</div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      root.innerHTML = descHTML + bodyHTML;
-
-      // Mount carousel behavior
-      const wrap = document.querySelector('.slider[data-images]');
-      if(wrap){
-        const imgs = JSON.parse(wrap.getAttribute('data-images'));
-        let idx = 0;
-        const imgEl = wrap.querySelector('img');
-        const dots = [...wrap.querySelectorAll('.dot')];
-        function set(n){
-          idx = (n+imgs.length)%imgs.length;
-          imgEl.src = imgs[idx];
-          dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
-        }
-        wrap.querySelector('.left').onclick = ()=> set(idx-1);
-        wrap.querySelector('.right').onclick = ()=> set(idx+1);
-        let timer = setInterval(()=> set(idx+1), 3000);
-        wrap.addEventListener('mouseenter', ()=> clearInterval(timer));
-        wrap.addEventListener('mouseleave', ()=> timer = setInterval(()=> set(idx+1), 3000));
-      }
+      document.getElementById('title').textContent = p.title;
+      document.getElementById('desc').textContent = p.longDescription || 'Project description coming soon.';
+      const tg = document.getElementById('tags');
+      (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); });
+      if(p.model){ document.getElementById('mv').setAttribute('src', p.model); }
+      const imgs = (p.images && p.images.length)? p.images : (p.image? [p.image]:[]);
+      mountSlider(document.getElementById('carousel'), imgs, 360);
     });
   </script>
 </body>
