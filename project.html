@@ -13,7 +13,9 @@
   </script>
   <style>
     .slider { position: relative; overflow: hidden; }
-    .slider img { width: 100%; height: 100%; object-fit: cover; display:block; }
+    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
+    .slide-layer img { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
+    .slide-layer.active { opacity:1; }
     .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
     .ctrl.left { left:8px; } .ctrl.right { right:8px; }
     .slider:hover .ctrl { opacity:1; pointer-events:auto; }
@@ -57,23 +59,60 @@
     function mountSlider(container, images, height){
       container.classList.add('slider');
       container.style.height = height + 'px';
-      const img = document.createElement('img');
-      img.alt = '';
-      img.src = images[0] || '';
-      container.appendChild(img);
+
+      const a = document.createElement('div'); a.className='slide-layer active';
+      const b = document.createElement('div'); b.className='slide-layer';
+      const imgA = document.createElement('img'); const imgB = document.createElement('img');
+      imgA.src = images[0] || ''; imgB.src = images[1] || images[0] || '';
+      a.appendChild(imgA); b.appendChild(imgB);
+      container.append(a,b);
+
+      let idx = 0, useA = true;
+
+      function show(n){
+        idx = (n+images.length)%images.length;
+        const nextSrc = images[idx];
+        if(useA){ imgB.src = nextSrc; a.classList.remove('active'); b.classList.add('active'); }
+        else   { imgA.src = nextSrc; b.classList.remove('active'); a.classList.add('active'); }
+        useA = !useA;
+        updateDots();
+      }
+
+      let dots = null;
+      function updateDots(){
+        if(!dots) return;
+        dots.childNodes.forEach((d,k)=> d.className='dot'+(k===idx?' active':''));
+      }
 
       if(images.length > 1){
         const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
         const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
-        const dots = document.createElement('div'); dots.className='dots';
-        const dotEls = images.map((_,i)=>{
-          const d = document.createElement('span'); d.className='dot' + (i===0?' active':'');
-          dots.appendChild(d); return d;
-        });
+        dots = document.createElement('div'); dots.className='dots';
+        images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
         container.append(left,right,dots);
-        let idx = 0;
-        function set(n){ idx=(n+images.length)%images.length; img.src=images[idx]; dotEls.forEach((d,i)=>d.classList.toggle('active',i===idx)); }
-        left.onclick=()=>set(idx-1); right.onclick=()=>set(idx+1);
+        left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
+
+        // Swipe/drag
+        let startX = null, dragging = false;
+        const threshold = 40;
+        const onStart = e => { startX = (e.touches? e.touches[0].clientX : e.clientX); dragging = true; };
+        const onMove = e => {
+          if(!dragging) return;
+          const x = (e.touches? e.touches[0].clientX : e.clientX);
+          if (Math.abs(x - startX) > threshold){
+            set(x < startX ? idx+1 : idx-1);
+            dragging = false;
+          }
+        };
+        const onEnd = () => { dragging = false; };
+        container.addEventListener('mousedown', onStart);
+        container.addEventListener('mousemove', onMove);
+        container.addEventListener('mouseup', onEnd);
+        container.addEventListener('mouseleave', onEnd);
+        container.addEventListener('touchstart', onStart, {passive:true});
+        container.addEventListener('touchmove', onMove, {passive:true});
+        container.addEventListener('touchend', onEnd);
+
       }
     }
 
