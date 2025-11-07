@@ -1,58 +1,74 @@
 [
   {
-    "title": "Airplane Practice Model",
-    "description": "Interactive 3D preview of a cleaned airplane assembly. Use mouse or touch to orbit and zoom.",
+    "title": "Airplane Model",
+    "slug": "airplane-model",
+    "description": "Interactive 3D airplane assembly view with gallery.",
+    "longDescription": "WIP \u2014 Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
     "tags": [
       "CAD",
       "Assembly",
       "3D"
     ],
-    "image": "assets/airplane_poster.jpg",
+    "images": [
+      "assets/airplane_poster.jpg"
+    ],
     "model": "assets/models/AIR_PLANE_CLEAN.glb",
     "link": ""
   },
   {
     "title": "C-Bond Composite Panels",
-    "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; collaboration with Comtek & L3Harris, analysis by Bombardier & McGill.",
+    "slug": "c-bond-composites",
+    "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; industry collaboration.",
+    "longDescription": "Coming soon \u2014 fixtures, resin system, test matrix, and data capture approach.",
     "tags": [
       "Composites",
       "Aerospace",
       "Research"
     ],
-    "image": "assets/c-bond.jpg",
-    "link": ""
+    "images": [
+      "assets/c-bond.jpg"
+    ]
   },
   {
     "title": "Plant Simulation \u2014 Throughput Optimization",
-    "description": "Simcenter/Plant Simulation model to explore buffer strategies and increase daily throughput on a production line.",
+    "slug": "plant-sim-throughput",
+    "description": "Simcenter model to explore buffer strategies and increase daily throughput.",
+    "longDescription": "Coming soon \u2014 KPIs, scenario design, and results summary.",
     "tags": [
       "Simulation",
       "Manufacturing",
       "Siemens"
     ],
-    "image": "assets/plant-simulation.jpg",
-    "link": ""
+    "images": [
+      "assets/plant-simulation.jpg"
+    ]
   },
   {
     "title": "CFD ANSYS Simulations",
-    "description": "2D/3D CFD exercises to study flow patterns, pressure fields and wake behavior around simple geometries.",
+    "slug": "cfd-ansys-collection",
+    "description": "2D/3D CFD exercises to study flow and pressure fields.",
+    "longDescription": "Coming soon \u2014 mesh strategy, boundary conditions, and validation.",
     "tags": [
       "CFD",
       "ANSYS",
       "FEA/CFD"
     ],
-    "image": "assets/cfd.jpg",
-    "link": ""
+    "images": [
+      "assets/cfd.jpg"
+    ]
   },
   {
     "title": "Proximity Sensor (Arduino)",
-    "description": "Small proximity sensor prototype with visual (LED) and acoustic (buzzer) alerts developed for an avionics course.",
+    "slug": "proximity-sensor",
+    "description": "Prototype with LED + buzzer alerts developed for an avionics course.",
+    "longDescription": "Coming soon \u2014 schematic, BOM, and firmware overview.",
     "tags": [
       "Avionics",
       "Arduino",
       "Electronics"
     ],
-    "image": "assets/proximity.jpg",
-    "link": ""
+    "images": [
+      "assets/proximity.jpg"
+    ]
   }
 ]

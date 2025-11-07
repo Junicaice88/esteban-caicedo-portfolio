@@ -1,6 +1,8 @@
-# Esteban Caicedo — Portfolio (V2.1.1 Dark + 3D)
+# Portfolio V2.2 — Dark + Project Details + 3D in detail page
 
-This version fixes the JS rendering and includes <model-viewer> 3D integration.
-
-Deploy: push all files to GitHub, Netlify auto-redeploys.
-Edit: update About/Experience in index.html and projects in projects.json.
+- Cards show the first image from `images[]` as preview.
+- Clicking a card opens `project.html?slug=...` which renders:
+  - Big 3D viewer (if `model` is provided),
+  - Image gallery,
+  - Long description.
+- Add more images by saving them in /assets and appending paths to the project's `images` array.
