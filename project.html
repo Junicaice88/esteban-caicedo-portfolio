@@ -1,192 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Project — Esteban Caicedo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://unpkg.com/three@0.158.0/examples/js/loaders/STLLoader.js"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
+      borderRadius: { '2xl': '1.25rem' }
+    }}};
+  </script>
   <style>
-    .slider{position:relative;overflow:hidden}
-    .slide-layer{position:absolute;inset:0;opacity:0;transition:opacity .4s}
-    .slide-layer.active{opacity:1}
-    .dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:6px}
-    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35)}
-    .dot.active{background:#fff}
-    .ctrl{position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;border-radius:8px;opacity:0}
-    .slider:hover .ctrl{opacity:1}
-    .ctrl.left{left:8px}.ctrl.right{right:8px}
-    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50}
-    .lb-open{display:flex}
-    .lightbox-inner{position:relative;max-width:92vw;max-height:92vh;width:92vw;height:92vh}
-    .lightbox img,.lightbox video{width:100%;height:100%;object-fit:contain;background:#0b0f1a}
-    .lb-close{position:absolute;top:12px;right:12px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer}
+    .slider { position: relative; overflow: hidden; }
+    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
+    .slide-layer img { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
+    .slide-layer.active { opacity:1; }
+    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
+    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
+    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
+    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
+    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
+    .dot.active { background: white; }
   </style>
+
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-<body class="bg-[#0b1220] text-white">
-  <header class="border-b border-white/10">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="/" class="text-xl font-semibold">Esteban Caicedo</a>
-      <a href="index.html" class="text-sm opacity-80 hover:opacity-100">← Back</a>
-    </div>
+<body class="bg-bg text-ink font-sans">
+  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a>
+      <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand text-sm">LinkedIn</a>
+    </nav>
   </header>
 
-  <main class="max-w-6xl mx-auto px-6 py-10">
-    <div id="content"></div>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
+    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
+    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
+      </div>
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <div id="carousel" class="slider" style="height:360px"></div>
+      </div>
+    </div>
   </main>
 
-  <!-- Lightbox -->
-  <div id="lightbox" class="lightbox">
-    <div class="lightbox-inner">
-      <button class="lb-close" onclick="closeLightbox()">Close ✕</button>
-      <img id="lbImg" class="hidden" alt="">
-      <video id="lbVid" class="hidden" controls playsinline></video>
+  <footer class="border-t border-white/5 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">
+      © 2025 Esteban Caicedo
     </div>
-  </div>
+  </footer>
 
   <script>
-    const q = new URLSearchParams(location.search);
-    const slug = q.get('slug');
+    function mountSlider(container, images, height){
+      container.classList.add('slider');
+      container.style.height = height + 'px';
 
-    /* simple slider reused */
-    function mountSlider(container, items, opts={}) {
-      const { height=360, interval=3000, autoplay=true } = opts;
-      container.classList.add('slider'); container.style.height = height+'px';
-      const A=document.createElement('div'), B=document.createElement('div'); A.className='slide-layer active'; B.className='slide-layer';
-      const mk = it => {
-        const el = document.createElement(it.type==='video'?'video':'img');
-        if(it.type==='video'){ el.src=it.src; el.muted=true; el.loop=true; el.playsInline=true; el.autoplay=true; }
-        else el.src=it.src; return el;
-      };
-      A.appendChild(mk(items[0]||{})); if(items[1]) B.appendChild(mk(items[1]));
-      container.append(A,B);
-      let i=0, useA=true, dots;
+      const a = document.createElement('div'); a.className='slide-layer active';
+      const b = document.createElement('div'); b.className='slide-layer';
+      const imgA = document.createElement('img'); const imgB = document.createElement('img');
+      imgA.src = images[0] || ''; imgB.src = images[1] || images[0] || '';
+      a.appendChild(imgA); b.appendChild(imgB);
+      container.append(a,b);
 
-      const left=document.createElement('div'), right=document.createElement('div');
-      left.className='ctrl left'; right.className='ctrl right'; left.textContent='<'; right.textContent='>';
-      left.onclick=()=>show(i-1); right.onclick=()=>show(i+1); container.append(left,right);
-      if(items.length>1){
-        dots=document.createElement('div'); dots.className='dots';
-        items.forEach((_,di)=>{ const d=document.createElement('span'); d.className='dot'+(di===0?' active':''); d.onclick=()=>show(di); dots.append(d); });
-        container.append(dots);
-      }
+      let idx = 0, useA = true;
+
       function show(n){
-        i=(n+items.length)%items.length; const next=items[i];
-        const inL = useA?B:A, outL = useA?A:B; inL.innerHTML=''; inL.append(mk(next));
-        outL.classList.remove('active'); inL.classList.add('active'); useA=!useA;
-        if(dots) [...dots.children].forEach((d,di)=> d.className='dot'+(di===i?' active':'')); 
+        idx = (n+images.length)%images.length;
+        const nextSrc = images[idx];
+        if(useA){ imgB.src = nextSrc; a.classList.remove('active'); b.classList.add('active'); }
+        else   { imgA.src = nextSrc; b.classList.remove('active'); a.classList.add('active'); }
+        useA = !useA;
+        updateDots();
       }
-      let t=null; function start(){ if(autoplay && items.length>1){ if(t)clearInterval(t); t=setInterval(()=>show(i+1), interval);} }
-      function stop(){ if(t){ clearInterval(t); t=null; } }
-      start(); container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start);
-    }
 
-    function openLightbox(src, type){
-      document.getElementById('lightbox').classList.add('lb-open');
-      const img=document.getElementById('lbImg'), vid=document.getElementById('lbVid');
-      if(type==='video'){ img.classList.add('hidden'); vid.classList.remove('hidden'); vid.src=src; vid.play(); }
-      else { vid.pause(); vid.classList.add('hidden'); img.classList.remove('hidden'); img.src=src; }
-    }
-    function closeLightbox(){
-      document.getElementById('lightbox').classList.remove('lb-open'); document.getElementById('lbVid').pause();
-    }
-    function guessType(p){ const e=p.split('.').pop().toLowerCase(); return ['mp4','webm','mov'].includes(e)?'video':'image'; }
-
-    fetch('projects.json').then(r=>r.json()).then(all=>{
-      const p = all.find(x=>x.slug===slug);
-      const el = document.getElementById('content');
-      if(!p){ el.innerHTML='<p class="opacity-70">Project not found.</p>'; return; }
-
-      // header
-      const head = `
-        <h1 class="text-3xl font-semibold">${p.title}</h1>
-        <p class="opacity-70 mt-2">${p.longDescription||p.summary||''}</p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          ${(p.tags||[]).map(t=>`<span class="text-xs px-2 py-1 rounded bg-white/10">${t}</span>`).join('')}
-        </div>
-      `;
-
-      // two columns
-      const cols = document.createElement('div');
-      cols.className='mt-8 grid md:grid-cols-2 gap-6';
-
-      // 3D viewer
-      const viewer = document.createElement('div');
-      viewer.className='bg-[#151b2b] rounded-2xl border border-white/5 overflow-hidden';
-      viewer.style.height='360px';
-      cols.append(viewer);
-
-      // gallery
-      const galWrap = document.createElement('div');
-      galWrap.className='bg-[#151b2b] rounded-2xl border border-white/5 overflow-hidden p-3';
-      const gal = document.createElement('div');
-      galWrap.append(gal);
-      cols.append(galWrap);
-
-      el.innerHTML = head; el.append(cols);
-
-      // build gallery
-      const media = (p.media||[]).map(m=>({src:m.src, type:(m.type||guessType(m.src))}));
-      mountSlider(gal, media.length?media:[{src:'assets/demo1.jpg',type:'image'}], {height:360,autoplay:true});
-      gal.addEventListener('click', (e)=>{ const first = media[0]||{src:'assets/demo1.jpg',type:'image'}; openLightbox(first.src, first.type); });
-
-      // load model (GLB / STL)
-      if(p.model){
-        initThree(viewer, p.model);
-      } else {
-        viewer.innerHTML = '<div class="h-full grid place-items-center opacity-60 text-sm">No 3D model for this project.</div>';
+      let dots = null;
+      function updateDots(){
+        if(!dots) return;
+        dots.childNodes.forEach((d,k)=> d.className='dot'+(k===idx?' active':''));
       }
+
+      if(images.length > 1){
+        const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+        const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+        dots = document.createElement('div'); dots.className='dots';
+        images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
+        container.append(left,right,dots);
+        left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
+
+        // Swipe/drag
+        let startX = null, dragging = false;
+        const threshold = 40;
+        const onStart = e => { startX = (e.touches? e.touches[0].clientX : e.clientX); dragging = true; };
+        const onMove = e => {
+          if(!dragging) return;
+          const x = (e.touches? e.touches[0].clientX : e.clientX);
+          if (Math.abs(x - startX) > threshold){
+            set(x < startX ? idx+1 : idx-1);
+            dragging = false;
+          }
+        };
+        const onEnd = () => { dragging = false; };
+        container.addEventListener('mousedown', onStart);
+        container.addEventListener('mousemove', onMove);
+        container.addEventListener('mouseup', onEnd);
+        container.addEventListener('mouseleave', onEnd);
+        container.addEventListener('touchstart', onStart, {passive:true});
+        container.addEventListener('touchmove', onMove, {passive:true});
+        container.addEventListener('touchend', onEnd);
+
+      }
+    }
+
+    function qs(k){return new URLSearchParams(location.search).get(k);}
+    const slug = qs('slug');
+
+    fetch('projects.json').then(r=>r.json()).then(items=>{
+      const p = items.find(x=>x.slug===slug);
+      if(!p){ document.getElementById('title').textContent='Project not found'; return; }
+
+      document.getElementById('title').textContent = p.title;
+      document.getElementById('desc').textContent = p.longDescription || 'Project description coming soon.';
+      const tg = document.getElementById('tags');
+      (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); });
+      if(p.model){ document.getElementById('mv').setAttribute('src', p.model); }
+      const imgs = (p.images && p.images.length)? p.images : (p.image? [p.image]:[]);
+      mountSlider(document.getElementById('carousel'), imgs, 360);
     });
-
-    function initThree(container, url){
-      const ext = url.split('.').pop().toLowerCase();
-      const scene=new THREE.Scene(); scene.background = new THREE.Color(0x0b1220);
-      const camera=new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, .1, 1000);
-      const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(container.clientWidth, container.clientHeight); container.appendChild(renderer.domElement);
-      const light1=new THREE.DirectionalLight(0xffffff,.9); light1.position.set(1,1,1);
-      const light2=new THREE.AmbientLight(0xffffff,.35); scene.add(light1,light2);
-
-      let mesh=null;
-      function fit(obj){
-        const box=new THREE.Box3().setFromObject(obj); const size=new THREE.Vector3(); box.getSize(size);
-        const center=new THREE.Vector3(); box.getCenter(center);
-        const maxDim=Math.max(size.x,size.y,size.z);
-        const dist=maxDim*2.2; camera.position.set(center.x+dist, center.y+dist, center.z+dist);
-        camera.lookAt(center);
-      }
-
-      if(ext==='glb' || ext==='gltf'){
-        const loader=new THREE.GLTFLoader();
-        loader.load(url, glb=>{
-          mesh=glb.scene; scene.add(mesh); fit(mesh);
-        });
-      } else if(ext==='stl'){
-        const loader=new THREE.STLLoader();
-        loader.load(url, geo=>{
-          const mat=new THREE.MeshStandardMaterial({color:0xa8b7ff, metalness:0.15, roughness:0.35});
-          mesh=new THREE.Mesh(geo, mat); scene.add(mesh); fit(mesh);
-        });
-      }
-
-      let isDown=false, lx=0, ly=0, rx=0, ry=0, sc=1;
-      renderer.domElement.addEventListener('mousedown',e=>{isDown=true; lx=e.clientX; ly=e.clientY;});
-      window.addEventListener('mouseup',()=>isDown=false);
-      window.addEventListener('mousemove',e=>{
-        if(isDown && mesh){
-          const dx=(e.clientX-lx)*0.01, dy=(e.clientY-ly)*0.01; mesh.rotation.y += dx; mesh.rotation.x += dy; lx=e.clientX; ly=e.clientY;
-        }
-      });
-      renderer.domElement.addEventListener('wheel',e=>{
-        sc *= (e.deltaY>0?1.08:0.92); sc=Math.min(5, Math.max(0.35, sc)); camera.zoom=1/sc; camera.updateProjectionMatrix();
-      });
-
-      function onResize(){ const w=container.clientWidth, h=container.clientHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); }
-      window.addEventListener('resize', onResize);
-
-      (function animate(){ requestAnimationFrame(animate); renderer.render(scene,camera); })();
-    }
   </script>
 </body>
 </html>

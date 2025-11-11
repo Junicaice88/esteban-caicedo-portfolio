@@ -1,188 +1,75 @@
 [
   {
-    "title": "Fifth Mill Practice",
-    "slug": "Fifth Mill Practice",
-    "description": "",
-    "longDescription": "",
+    "title": "Airplane Model",
+    "slug": "airplane-model",
+    "description": "Concept single-engine light aircraft model \u2014 3D viewer and renders.",
+    "longDescription": "WIP \u2014 Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
     "tags": [
       "CAD",
+      "Assembly",
       "3D"
     ],
-    "model": "assets/models/Fifth Mill Practice.STL",
-    "media": []
+    "images": [
+      "assets/airplane_1.jpg",
+      "assets/airplane_2.jpg",
+      "assets/airplane_3.jpg"
+    ],
+    "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
   {
-    "title": "First Lathe Project",
-    "slug": "First Lathe Project",
-    "description": "",
-    "longDescription": "",
+    "title": "C-Bond Composite Panels",
+    "slug": "c-bond-composites",
+    "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; industry collaboration.",
+    "longDescription": "Coming soon \u2014 fixtures, resin system, test matrix, and data capture approach.",
     "tags": [
-      "CAD",
-      "3D"
+      "Composites",
+      "Aerospace",
+      "Research"
     ],
-    "model": "assets/models/First Lathe Project.stl",
-    "media": [
-      {
-        "type": "video",
-        "src": "assets/First Lathe Project.mp4"
-      }
+    "images": [
+      "assets/c-bond.jpg"
     ]
   },
   {
-    "title": "First Mill Practice",
-    "slug": "First Mill Practice",
-    "description": "",
-    "longDescription": "",
+    "title": "Plant Simulation \u2014 Throughput Optimization",
+    "slug": "plant-sim-throughput",
+    "description": "Simcenter model to explore buffer strategies and increase daily throughput.",
+    "longDescription": "Coming soon \u2014 KPIs, scenario design, and results summary.",
     "tags": [
-      "CAD",
-      "3D"
+      "Simulation",
+      "Manufacturing",
+      "Siemens"
     ],
-    "model": "assets/models/First Mill Practice.stl",
-    "media": []
-  },
-  {
-    "title": "First Sheetmetal Practice",
-    "slug": "First Sheetmetal Practice",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/First Sheetmetal Practice.stl",
-    "media": [
-      {
-        "type": "image",
-        "src": "assets/First Sheetmetal Practice.jpg"
-      }
+    "images": [
+      "assets/plant-simulation.jpg"
     ]
   },
   {
-    "title": "Fourth Mill Practice",
-    "slug": "Fourth Mill Practice",
-    "description": "",
-    "longDescription": "",
+    "title": "CFD ANSYS Simulations",
+    "slug": "cfd-ansys-collection",
+    "description": "2D/3D CFD exercises to study flow and pressure fields.",
+    "longDescription": "Coming soon \u2014 mesh strategy, boundary conditions, and validation.",
     "tags": [
-      "CAD",
-      "3D"
+      "CFD",
+      "ANSYS",
+      "FEA/CFD"
     ],
-    "model": "assets/models/Fourth Mill Practice.STL",
-    "media": [
-      {
-        "type": "video",
-        "src": "assets/Fourth Mill Practice.mp4"
-      }
+    "images": [
+      "assets/cfd.jpg"
     ]
   },
   {
-    "title": "Landing Gear",
-    "slug": "Landing Gear",
-    "description": "",
-    "longDescription": "",
+    "title": "Proximity Sensor (Arduino)",
+    "slug": "proximity-sensor",
+    "description": "Prototype with LED + buzzer alerts developed for an avionics course.",
+    "longDescription": "Coming soon \u2014 schematic, BOM, and firmware overview.",
     "tags": [
-      "CAD",
-      "3D"
+      "Avionics",
+      "Arduino",
+      "Electronics"
     ],
-    "model": "assets/models/Landing Gear.stl",
-    "media": []
-  },
-  {
-    "title": "Linkage",
-    "slug": "Linkage",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Linkage.stl",
-    "media": []
-  },
-  {
-    "title": "Second Mill Pracice",
-    "slug": "Second Mill Pracice",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Second Mill Pracice.STL",
-    "media": []
-  },
-  {
-    "title": "Second Sheetmetal Practice",
-    "slug": "Second Sheetmetal Practice",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Second Sheetmetal Practice.stl",
-    "media": [
-      {
-        "type": "image",
-        "src": "assets/Second Sheetmetal Practice.jpg"
-      }
-    ]
-  },
-  {
-    "title": "Third Mill Practice",
-    "slug": "Third Mill Practice",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Third Mill Practice.STL",
-    "media": []
-  },
-  {
-    "title": "Antonov",
-    "slug": "Antonov",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Antonov.stl",
-    "media": []
-  },
-  {
-    "title": "Mouse",
-    "slug": "Mouse",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Mouse.stl",
-    "media": [
-      {
-        "type": "image",
-        "src": "assets/Mouse.png"
-      }
-    ]
-  },
-  {
-    "title": "Nose_Landing_Gear",
-    "slug": "Nose_Landing_Gear",
-    "description": "",
-    "longDescription": "",
-    "tags": [
-      "CAD",
-      "3D"
-    ],
-    "model": "assets/models/Nose_Landing_Gear.stl",
-    "media": [
-      {
-        "type": "video",
-        "src": "assets/Nose_Landing_Gear.mp4"
-      }
+    "images": [
+      "assets/proximity.jpg"
     ]
   }
 ]
