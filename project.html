@@ -1,136 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Project — Esteban Caicedo</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: {
-      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
-      borderRadius: { '2xl': '1.25rem' }
-    }}};
-  </script>
-  <style>
-    .slider { position: relative; overflow: hidden; }
-    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
-    .slide-layer img { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
-    .slide-layer.active { opacity:1; }
-    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
-    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
-    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
-    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
-    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
-    .dot.active { background: white; }
-  </style>
-
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Project — Airplane Model</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+  "GLTFLoader":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js",
+  "OrbitControls":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js"
+}}</script>
+<style>
+:root{--bg:#0b1220;--ink:#e6e9f5}
+body{background:var(--bg);color:var(--ink)}
+.card{background:rgba(21,27,43,.9);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.slider{position:relative;overflow:hidden}
+.slider img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
+.slider img.active{opacity:1}
+.ctrl{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;width:36px;height:36px;border-radius:8px;
+display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;opacity:0;transition:.25s}
+.ctrl.left{left:8px}.ctrl.right{right:8px}.card:hover .ctrl{opacity:1}
+.dots{position:absolute;left:0;right:0;bottom:.5rem;display:flex;gap:.4rem;justify-content:center}
+.dot{width:.45rem;height:.45rem;border-radius:999px;background:rgba(255,255,255,.35)}.dot.active{background:#fff}
+</style>
 </head>
-<body class="bg-bg text-ink font-sans">
-  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
-    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a>
-      <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand text-sm">LinkedIn</a>
-    </nav>
-  </header>
-
-  <main class="max-w-6xl mx-auto px-6 py-8">
-    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
-    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
-    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
-
-    <div class="grid md:grid-cols-2 gap-4">
-      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
-      </div>
-      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
-        <div id="carousel" class="slider" style="height:360px"></div>
+<body class="font-sans">
+<header class="max-w-6xl mx-auto px-6 py-6"><a href="index.html" class="text-slate-300 hover:text-white">← Back</a></header>
+<main class="max-w-6xl mx-auto px-6 pb-20">
+  <h1 class="text-3xl font-semibold mb-2">Airplane Model</h1>
+  <p class="text-slate-300 mb-6 max-w-3xl">Smooth-surfaced airplane assembly cleaned for real‑time viewing. Explore the model interactively and browse renders below.</p>
+  <div class="grid md:grid-cols-2 gap-6 items-stretch">
+    <div class="card rounded-2xl overflow-hidden border border-white/5"><div id="viewer" style="height:380px;"></div></div>
+    <div class="card rounded-2xl overflow-hidden border border-white/5">
+      <div class="slider h-[380px] relative">
+        <img src="assets/images/Airplane Model1.jpg" class="active" alt="Airplane render 1">
+        <img src="assets/images/Airplane Model2.jpg" alt="Airplane render 2">
+        <img src="assets/images/Airplane Model3.jpg" alt="Airplane render 3">
+        <div class="ctrl left" aria-label="Prev">‹</div>
+        <div class="ctrl right" aria-label="Next">›</div>
+        <div class="dots"></div>
       </div>
     </div>
-  </main>
-
-  <footer class="border-t border-white/5 mt-16">
-    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">
-      © 2025 Esteban Caicedo
-    </div>
-  </footer>
-
-  <script>
-    function mountSlider(container, images, height){
-      container.classList.add('slider');
-      container.style.height = height + 'px';
-
-      const a = document.createElement('div'); a.className='slide-layer active';
-      const b = document.createElement('div'); b.className='slide-layer';
-      const imgA = document.createElement('img'); const imgB = document.createElement('img');
-      imgA.src = images[0] || ''; imgB.src = images[1] || images[0] || '';
-      a.appendChild(imgA); b.appendChild(imgB);
-      container.append(a,b);
-
-      let idx = 0, useA = true;
-
-      function show(n){
-        idx = (n+images.length)%images.length;
-        const nextSrc = images[idx];
-        if(useA){ imgB.src = nextSrc; a.classList.remove('active'); b.classList.add('active'); }
-        else   { imgA.src = nextSrc; b.classList.remove('active'); a.classList.add('active'); }
-        useA = !useA;
-        updateDots();
-      }
-
-      let dots = null;
-      function updateDots(){
-        if(!dots) return;
-        dots.childNodes.forEach((d,k)=> d.className='dot'+(k===idx?' active':''));
-      }
-
-      if(images.length > 1){
-        const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
-        const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
-        dots = document.createElement('div'); dots.className='dots';
-        images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
-        container.append(left,right,dots);
-        left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
-
-        // Swipe/drag
-        let startX = null, dragging = false;
-        const threshold = 40;
-        const onStart = e => { startX = (e.touches? e.touches[0].clientX : e.clientX); dragging = true; };
-        const onMove = e => {
-          if(!dragging) return;
-          const x = (e.touches? e.touches[0].clientX : e.clientX);
-          if (Math.abs(x - startX) > threshold){
-            set(x < startX ? idx+1 : idx-1);
-            dragging = false;
-          }
-        };
-        const onEnd = () => { dragging = false; };
-        container.addEventListener('mousedown', onStart);
-        container.addEventListener('mousemove', onMove);
-        container.addEventListener('mouseup', onEnd);
-        container.addEventListener('mouseleave', onEnd);
-        container.addEventListener('touchstart', onStart, {passive:true});
-        container.addEventListener('touchmove', onMove, {passive:true});
-        container.addEventListener('touchend', onEnd);
-
-      }
-    }
-
-    function qs(k){return new URLSearchParams(location.search).get(k);}
-    const slug = qs('slug');
-
-    fetch('projects.json').then(r=>r.json()).then(items=>{
-      const p = items.find(x=>x.slug===slug);
-      if(!p){ document.getElementById('title').textContent='Project not found'; return; }
-
-      document.getElementById('title').textContent = p.title;
-      document.getElementById('desc').textContent = p.longDescription || 'Project description coming soon.';
-      const tg = document.getElementById('tags');
-      (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); });
-      if(p.model){ document.getElementById('mv').setAttribute('src', p.model); }
-      const imgs = (p.images && p.images.length)? p.images : (p.image? [p.image]:[]);
-      mountSlider(document.getElementById('carousel'), imgs, 360);
-    });
-  </script>
-</body>
-</html>
+  </div>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'GLTFLoader';
+import {OrbitControls} from 'OrbitControls';
+const container=document.getElementById('viewer');
+const W=container.clientWidth,H=380;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0b1220);
+const camera=new THREE.PerspectiveCamera(50,W/H,0.1,1000);camera.position.set(2.4,1.6,2.6);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(devicePixelRatio);renderer.setSize(W,H);container.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff,0x444466,0.8));const d=new THREE.DirectionalLight(0xffffff,0.9);d.position.set(3,3,2);scene.add(d);
+const grid=new THREE.GridHelper(10,10,0x3c435f,0x1f2436);grid.material.opacity=.15;grid.material.transparent=true;scene.add(grid);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
+new GLTFLoader().load('assets/models/AIR_PLANE_CLEAN.glb',(g)=>{
+  const model=g.scene;scene.add(model);
+  const box=new THREE.Box3().setFromObject(model);
+  const size=box.getSize(new THREE.Vector3()).length();
+  const center=box.getCenter(new THREE.Vector3());
+  model.position.sub(center);
+  model.scale.setScalar(2.2/size);
+});
+function onResize(){const w=container.clientWidth;renderer.setSize(w,H);camera.aspect=w/H;camera.updateProjectionMatrix()}
+addEventListener('resize',onResize);
+(function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera)})();
+// slider
+const slider=document.querySelector('.slider');const imgs=[...slider.querySelectorAll('img')];const dots=slider.querySelector('.dots');
+imgs.forEach((_,i)=>{const s=document.createElement('span');s.className='dot'+(i===0?' active':'');dots.appendChild(s)});
+let idx=0,timer=null;function show(n){idx=(n+imgs.length)%imgs.length;imgs.forEach((im,i)=>im.classList.toggle('active',i===idx));dots.childNodes.forEach((d,i)=>d.className='dot'+(i===idx?' active':''))}
+function start(){if(timer)return;timer=setInterval(()=>show(idx+1),3000)}function stop(){clearInterval(timer);timer=null}
+slider.querySelector('.left').onclick=()=>{stop();show(idx-1);start()};slider.querySelector('.right').onclick=()=>{stop();show(idx+1);start()};
+slider.addEventListener('mouseenter',stop);slider.addEventListener('mouseleave',start);start();
+</script>
+</body></html>
