@@ -1,218 +1,102 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Project</title>
-
-  <!-- Tailwind CDN (utilidad rápida) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    body { background:#0b1220; color:#e4e7ee; }
-    .card { background:#161b2a; border:1px solid rgba(255,255,255,.08); border-radius:16px; }
-    .viewer-wrap { min-height: 420px; }
-    canvas { display:block; outline:none; }
-    .slider { position:relative; overflow:hidden; }
-    .slide { display:none; }
-    .slide.active { display:block; }
-    .dot { width:8px; height:8px; border-radius:999px; background:#93a3ff33; }
-    .dot.active { background:#93a3ff; }
-    .ctrl { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); color:#fff; border-radius:8px; padding:6px 8px; cursor:pointer; user-select:none; }
-    .ctrl.left { left:8px; } .ctrl.right{ right:8px; }
-  </style>
-
-  <!-- Three.js + GLTFLoader (CDN) -->
-  <script type="module">
-    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-    import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
-
-    window.THREE = THREE;
-    window.GLTFLoader = GLTFLoader;
-  </script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Project – Detail</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-
-<body class="font-sans">
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <a href="index.html" class="text-sm text-indigo-300 hover:text-indigo-200">← Back</a>
-
-    <h1 id="title" class="text-3xl font-semibold mt-3">Project</h1>
-    <p id="desc" class="text-slate-300 mt-2"></p>
-
-    <div class="grid md:grid-cols-2 gap-6 mt-6">
-      <!-- Viewer 3D -->
-      <div class="card p-3 viewer-wrap">
-        <div id="viewer" class="w-full h-[420px] md:h-[520px] rounded-xl overflow-hidden"></div>
-      </div>
-
-      <!-- Slider imágenes / videos -->
-      <div class="card p-3">
-        <div id="mediaSlider" class="slider rounded-xl overflow-hidden"></div>
-        <div id="dots" class="flex gap-2 justify-center mt-3"></div>
-      </div>
-    </div>
-
-    <p id="long" class="text-slate-300 mt-6"></p>
-    <div id="tags" class="flex flex-wrap gap-2 mt-3"></div>
+<body>
+  <div class="header">
+    <a href="index.html" class="back">← Back</a>
   </div>
 
-  <script type="module">
-    // Utilidades
-    const $ = s => document.querySelector(s);
-    const params = new URLSearchParams(location.search);
-    const slug = params.get('slug');
+  <main class="container" id="root">
+    <h1 id="title">Project</h1>
+    <p id="desc" class="lead"></p>
 
-    if(!slug){
-      $("#title").textContent = "Project not found";
-      throw new Error("Missing slug");
-    }
+    <div class="row">
+      <div class="viewer" id="viewerBox"></div>
+      <div class="media" id="mediaBox"></div>
+    </div>
+  </main>
 
-    // Cargar proyectos
-    const projects = await fetch("projects.json").then(r=>r.json());
-    const proj = projects.find(p => p.slug === slug);
+<script>
+const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
 
-    if(!proj){
-      $("#title").textContent = "Project not found";
-      throw new Error("Slug not in projects.json");
-    }
+function makeLayer(src){
+  const layer = document.createElement('div');
+  layer.className = 'slide-layer';
+  if(isVideo(src)){
+    const v = document.createElement('video');
+    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
+    layer.appendChild(v);
+  } else {
+    const img = document.createElement('img');
+    img.src = src; img.loading='lazy';
+    layer.appendChild(img);
+  }
+  return layer;
+}
 
-    // Poner textos
-    $("#title").textContent = proj.title;
-    $("#desc").textContent = proj.description || "";
-    $("#long").textContent = proj.longDescription || "";
+function mountSlider(container, sources, height=420){
+  container.className = 'slider';
+  container.style.height = height + 'px';
+  const a = makeLayer(sources[0]||''); a.classList.add('active');
+  const b = makeLayer(sources[1]||sources[0]||'');
+  container.append(a,b);
 
-    // Chips
-    $("#tags").innerHTML = (proj.tags || []).map(t =>
-      `<span class="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 text-sm">${t}</span>`
-    ).join("");
+  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
+  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
+  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
+  container.append(left,right,dots);
 
-    // ---------- SLIDER ----------
-    const media = [
-      ...(proj.images || []).map(src => ({type:"img", src})),
-      ...(proj.videos || []).map(src => ({type:"video", src}))
-    ];
+  sources.forEach((_,i)=>{
+    const d = document.createElement('span');
+    d.className = 'dot' + (i===0?' active':'');
+    d.onclick = () => show(i);
+    dots.appendChild(d);
+  });
 
-    const slider = $("#mediaSlider");
-    const dotsWrap = $("#dots");
-    let idx = 0;
+  let idx = 0, useA=true;
+  function show(n){
+    if(!sources.length) return;
+    idx = (n + sources.length) % sources.length;
+    const next = sources[idx];
+    const front = useA ? a : b;
+    const back  = useA ? b : a;
+    const fresh = makeLayer(next);
+    back.replaceChildren(...fresh.childNodes);
+    front.classList.remove('active');
+    back.classList.add('active');
+    useA = !useA;
+    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
+  }
+  left.onclick = ()=>show(idx-1);
+  right.onclick = ()=>show(idx+1);
+}
 
-    function renderSlider(){
-      slider.innerHTML = "";
-      media.forEach((m, i)=>{
-        const el = document.createElement(m.type === "img" ? "img" : "video");
-        el.className = "slide w-full rounded-xl";
-        if(m.type === "img"){
-          el.src = m.src; el.loading="lazy";
-        } else {
-          el.src = m.src; el.controls = true; el.playsInline = true;
-        }
-        if(i === idx) el.classList.add("active");
-        slider.appendChild(el);
-      });
+const qs = new URLSearchParams(location.search);
+const slug = qs.get('slug');
 
-      // Controles
-      const left = document.createElement("div");
-      left.className="ctrl left"; left.textContent="‹";
-      left.onclick = ()=>{ idx = (idx - 1 + media.length) % media.length; renderSlider(); };
+fetch('projects.json').then(r=>r.json()).then(items=>{
+  const p = items.find(x=>x.slug===slug) || items[0];
+  document.getElementById('title').textContent = p.title;
+  document.getElementById('desc').textContent  = p.longDescription || p.description || '';
 
-      const right = document.createElement("div");
-      right.className="ctrl right"; right.textContent="›";
-      right.onclick = ()=>{ idx = (idx + 1) % media.length; renderSlider(); };
+  // Media (images or videos)
+  const media = (p.media && p.media.length) ? p.media : (p.images || []);
+  if(media.length){
+    mountSlider(document.getElementById('mediaBox'), media, 420);
+  }
 
-      if(media.length > 1){ slider.append(left, right); }
-
-      // Dots
-      dotsWrap.innerHTML = "";
-      media.forEach((_, i)=>{
-        const d = document.createElement("div");
-        d.className = "dot" + (i===idx ? " active" : "");
-        d.onclick = ()=>{ idx = i; renderSlider(); };
-        dotsWrap.appendChild(d);
-      });
-    }
-    renderSlider();
-
-    // ---------- VIEWER 3D (Three.js) ----------
-    // Si no hay modelo, mostramos placeholder
-    if(!proj.model){
-      $("#viewer").innerHTML = `<div class="w-full h-full grid place-items-center text-slate-400">
-        No 3D model for this project
-      </div>`;
-    } else {
-      const THREE = window.THREE;
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0b1220);
-
-      const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:"high-performance" });
-      const vwrap = $("#viewer");
-      vwrap.appendChild(renderer.domElement);
-
-      // Cámara
-      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-      camera.position.set(2.5, 1.5, 3.2);
-
-      // Luces
-      const hemi = new THREE.HemisphereLight(0xffffff, 0x333344, 1.1);
-      scene.add(hemi);
-      const dir = new THREE.DirectionalLight(0xffffff, 1.0);
-      dir.position.set(3, 5, 7);
-      scene.add(dir);
-
-      // Resize
-      function onResize(){
-        const {clientWidth:w, clientHeight:h} = vwrap;
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      }
-      new ResizeObserver(onResize).observe(vwrap);
-
-      // Animación
-      function animate(){
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      }
-
-      // Grid floor sutil (visual)
-      const grid = new THREE.GridHelper(10, 10, 0x334, 0x112);
-      grid.material.opacity = 0.25; grid.material.transparent = true;
-      scene.add(grid);
-
-      // Cargar GLB (soporta espacios en rutas)
-      const loader = new window.GLTFLoader();
-      const modelPath = encodeURI(proj.model);
-
-      loader.load(
-        modelPath,
-        gltf=>{
-          const root = gltf.scene || gltf.scenes[0];
-          // Normalizar tamaño aproximado
-          const box = new THREE.Box3().setFromObject(root);
-          const size = box.getSize(new THREE.Vector3()).length();
-          const center = box.getCenter(new THREE.Vector3());
-          root.position.x += (root.position.x - center.x);
-          root.position.y += (root.position.y - center.y);
-          root.position.z += (root.position.z - center.z);
-          const s = 2.0 / size;
-          root.scale.setScalar(s);
-          scene.add(root);
-
-          // Re-centrar cámara
-          camera.position.set(2.5, 1.6, 3.0);
-          camera.lookAt(0,0,0);
-
-          onResize();
-          animate();
-        },
-        undefined,
-        err=>{
-          console.error("GLB load error:", err);
-          $("#viewer").innerHTML = `<div class="w-full h-full grid place-items-center text-red-300">
-            Error loading model:<br/><code>${proj.model}</code>
-          </div>`;
-        }
-      );
-    }
-  </script>
+  // 3D model (if provided)
+  if(p.model){
+    const vb = document.getElementById('viewerBox');
+    vb.innerHTML = `<model-viewer src="${p.model}" camera-controls autoplay style="width:100%;height:100%"></model-viewer>`;
+  }
+});
+</script>
 </body>
 </html>
