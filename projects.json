@@ -6,9 +6,9 @@
     "longDescription": "WIP — Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
     "tags": ["CAD", "Assembly", "3D"],
     "images": [
-      "assets/images/airplane_1.jpg",
-      "assets/images/airplane_2.jpg",
-      "assets/images/airplane_3.jpg"
+      "assets/images/Airplane Model1.jpg",
+      "assets/images/Airplane Model2.jpg",
+      "assets/images/Airplane Model3.jpg"
     ],
     "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
@@ -19,9 +19,9 @@
     "longDescription": "First pass at the Antonov AN-10 using a surface-driven workflow (lofted skins, guide curves, and continuity checks).",
     "tags": ["CAD", "Surfaces", "3D"],
     "images": [
-      "assets/images/antonov_1.jpg",
-      "assets/images/antonov_2.jpg",
-      "assets/images/antonov_3.jpg"
+      "assets/images/Antonov1.jpg",
+      "assets/images/Antonov2.jpg",
+      "assets/images/Antonov3.jpg"
     ],
     "model": "assets/models/Antonov.glb"
   }
