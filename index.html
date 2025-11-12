@@ -1,116 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Esteban Caicedo – Engineering Projects</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Engineering Projects</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    /* Tailwind theme tweaks (opcional) */
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg:  "#0b1220",
+            card:"#151b2b",
+            ink: "#e6e9f5",
+            dim: "#9aa3b2",
+            brand: { DEFAULT:"#4f6af3" }
+          },
+          borderRadius: { '2xl': '1.25rem' }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background:#0b1220; color:#e6e9f5; }
+    .card { background: rgba(255,255,255,.06); }
+    .btn { background: rgba(255,255,255,.06); }
+    .slider { position:relative; overflow:hidden; }
+    .slide { position:absolute; inset:0; opacity:0; transition:opacity .6s ease; }
+    .slide.active { opacity:1; }
+    .slide img, .slide video { width:100%; height:100%; object-fit:cover; display:block; }
+    .ctrl { position:absolute; top:50%; transform:translateY(-50%); z-index:3; background:rgba(0,0,0,.45); color:#fff; border-radius:8px; padding:6px 10px; cursor:pointer; user-select:none; opacity:.5; transition:opacity .2s; }
+    .ctrl:hover { opacity:1; }
+    .ctrl.left{ left:10px; } .ctrl.right{ right:10px; }
+    .dots{ position:absolute; bottom:10px; left:0; right:0; display:flex; justify-content:center; gap:6px; z-index:3; }
+    .dot{ width:8px; height:8px; border-radius:9999px; background:rgba(255,255,255,.35) }
+    .dot.active{ background:#fff; }
+    .tag { background: rgba(255,255,255,.06); color:#cfd6e6; border:1px solid rgba(255,255,255,.08); }
+    a:focus-visible, button:focus-visible { outline: 2px solid #4f6af3; outline-offset: 2px; }
+  </style>
 </head>
-<body>
-  <header class="header">
-    <a href="index.html"><strong>Esteban Caicedo</strong></a>
-    <div class="spacer"></div>
-    <a href="#projects">Projects</a>
-    <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+<body class="font-sans">
+  <!-- Nav -->
+  <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+    <a href="index.html" class="text-xl font-semibold">Esteban Caicedo</a>
+    <nav class="flex gap-6 text-sm text-dim">
+      <a href="index.html" class="hover:text-ink">Projects</a>
+      <a href="https://www.linkedin.com/" target="_blank" rel="noopener" class="hover:text-ink">LinkedIn</a>
+    </nav>
   </header>
 
-  <main class="container" id="projects">
-    <h1>Engineering Projects</h1>
-    <p class="lead">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p>
-    <div id="grid" class="grid"></div>
+  <main class="max-w-6xl mx-auto px-6 pb-20">
+    <h1 class="text-3xl font-semibold mb-2">Engineering Projects</h1>
+    <p class="text-dim mb-10">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p>
+
+    <!-- Filter chips -->
+    <div id="filters" class="flex flex-wrap gap-2 mb-6"></div>
+
+    <!-- Grid -->
+    <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </main>
 
-<script>
-// Helpers
-const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
+  <script>
+    // Helper: rutas seguras (espacios, acentos, etc.)
+    const safe = p => (typeof p === 'string' ? encodeURI(p) : p);
 
-// Make a media layer (img or video)
-function makeLayer(src){
-  const layer = document.createElement('div');
-  layer.className = 'slide-layer';
-  if(isVideo(src)){
-    const v = document.createElement('video');
-    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
-    layer.appendChild(v);
-  } else {
-    const img = document.createElement('img');
-    img.src = src; img.loading = 'lazy';
-    layer.appendChild(img);
-  }
-  return layer;
-}
+    // Mount image/video slider in a container
+    function mountSlider(box, media = [], height = 260, opts = {}) {
+      const autoplay = opts.autoplay ?? true;
+      const interval = opts.interval ?? 3000;
 
-// Slider with cross-fade (supports images/videos)
-function mountSlider(container, sources, height=260){
-  container.classList.add('slider');
-  container.style.height = height + 'px';
+      box.classList.add('slider');
+      box.style.height = height + 'px';
 
-  const a = makeLayer(sources[0] || '');
-  const b = makeLayer(sources[1] || sources[0] || '');
-  a.classList.add('active');
-  container.append(a,b);
+      const a = document.createElement('div');
+      a.className = 'slide active';
+      const b = document.createElement('div');
+      b.className = 'slide';
+      box.append(a,b);
 
-  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
-  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
-  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
-  container.append(left, right, dots);
+      let i = 0, useA = true, timer = null;
 
-  sources.forEach((_,i)=>{
-    const d = document.createElement('span');
-    d.className = 'dot' + (i===0?' active':'');
-    d.onclick = () => show(i);
-    dots.appendChild(d);
-  });
+      const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+      const right= document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+      const dots = document.createElement('div'); dots.className='dots';
+      box.append(left,right,dots);
 
-  let idx = 0, useA = true, timer = null;
-  function show(n){
-    if(!sources.length) return;
-    idx = (n + sources.length) % sources.length;
-    const next = sources[idx];
-    const front = useA ? a : b;
-    const back  = useA ? b : a;
-    const fresh = makeLayer(next);
-    back.replaceChildren(...fresh.childNodes);
-    front.classList.remove('active');
-    back.classList.add('active');
-    useA = !useA;
-    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
-  }
-  left.onclick = ()=>show(idx-1);
-  right.onclick = ()=>show(idx+1);
+      function renderSlide(el, src){
+        el.innerHTML = '';
+        if (src.toLowerCase().endsWith('.mp4')) {
+          const v = document.createElement('video');
+          v.src = safe(src);
+          v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+          v.oncanplay = ()=> v.play().catch(()=>{});
+          el.appendChild(v);
+        } else {
+          const img = document.createElement('img');
+          img.loading = 'lazy';
+          img.src = safe(src);
+          img.onerror = ()=> console.warn('IMG 404:', img.src);
+          el.appendChild(img);
+        }
+      }
 
-  function start(){ if(sources.length>1) timer = setInterval(()=>show(idx+1), 3000); }
-  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
-  container.addEventListener('mouseenter', stop);
-  container.addEventListener('mouseleave', start);
-  start();
-}
+      function paint(n){
+        const idx = ((n%media.length)+media.length)%media.length;
+        const nextSrc = media[idx];
+        const cur = useA ? a : b;
+        const nxt = useA ? b : a;
+        renderSlide(nxt, nextSrc);
 
-// Build cards from projects.json
-fetch('projects.json').then(r=>r.json()).then(items=>{
-  const grid = document.getElementById('grid');
-  items.forEach(p=>{
-    const a = document.createElement('a');
-    a.href = 'project.html?slug=' + encodeURIComponent(p.slug);
-    a.className = 'card';
+        cur.classList.remove('active');
+        nxt.classList.add('active');
+        useA = !useA;
 
-    const slider = document.createElement('div');
-    const sources = (p.media && p.media.length ? p.media : (p.images || [])).slice();
-    if(!sources.length){ sources.push('assets/images/Airplane Model1.jpg'); } // harmless fallback
-    mountSlider(slider, sources, 260);
+        // dots
+        [...dots.children].forEach((d,k)=> d.className = 'dot' + (k===idx?' active':''));        
+        i = idx;
+      }
 
-    const body = document.createElement('div');
-    body.className = 'card-body';
-    body.innerHTML = `
-      <h3>${p.title}</h3>
-      <p class="lead">${p.description || ''}</p>
-      <div class="tags">${(p.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div>
-    `;
+      // dots setup
+      media.forEach((_m,k)=>{
+        const d = document.createElement('span'); d.className='dot'+(k===0?' active':'');
+        d.onclick = ()=> paint(k);
+        dots.appendChild(d);
+      });
 
-    a.append(slider, body);
-    grid.appendChild(a);
-  });
-});
-</script>
+      left.onclick = ()=> paint(i-1);
+      right.onclick= ()=> paint(i+1);
+
+      // initial
+      if (media.length) { renderSlide(a, media[0]); }
+
+      function start(){ if(autoplay && media.length>1 && !timer){ timer = setInterval(()=> paint(i+1), interval);} }
+      function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+      box.addEventListener('mouseenter', stop);
+      box.addEventListener('mouseleave', start);
+      start();
+    }
+
+    // Build tag chips
+    function buildFilterChips(allTags, onPick) {
+      const filters = document.getElementById('filters');
+      filters.innerHTML = '';
+      const chips = ['All', ...allTags];
+
+      chips.forEach(tag=>{
+        const b = document.createElement('button');
+        b.className = 'btn px-3 py-1 rounded-full text-sm';
+        b.textContent = tag;
+        b.onclick = ()=> onPick(tag==='All' ? null : tag);
+        filters.appendChild(b);
+      });
+    }
+
+    // Build the cards grid
+    async function init() {
+      const res = await fetch('projects.json');
+      const items = await res.json();
+
+      const allTags = Array.from(new Set(items.flatMap(p=>p.tags || [])));
+      let activeTag = null;
+
+      buildFilterChips(allTags, (t)=>{ activeTag = t; paint(); });
+      paint();
+
+      function paint() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML='';
+        const list = activeTag ? items.filter(p=> p.tags?.includes(activeTag)) : items;
+
+        list.forEach(p=>{
+          const card = document.createElement('a');
+          card.href = `project.html?slug=${encodeURIComponent(p.slug)}`;
+          card.className = 'card block rounded-2xl border border-white/10 overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand';
+
+          // media slider
+          const slider = document.createElement('div');
+          slider.className = 'w-full';
+          const media = (p.images || []).map(safe).concat(p.videos||[]);
+          mountSlider(slider, media, 260, {autoplay:true});
+
+          // body
+          const body = document.createElement('div');
+          body.className = 'p-5';
+          const h3 = document.createElement('h3'); h3.className='font-semibold mb-2'; h3.textContent = p.title;
+          const desc = document.createElement('p'); desc.className='text-sm text-dim mb-3'; desc.textContent = p.description || '';
+          const tags = document.createElement('div'); tags.className='flex flex-wrap gap-2';
+          (p.tags||[]).forEach(t=>{
+            const x = document.createElement('span'); x.className='tag text-xs px-2 py-1 rounded-full'; x.textContent=t; tags.appendChild(x);
+          });
+
+          body.append(h3, desc, tags);
+          card.append(slider, body);
+          grid.appendChild(card);
+        });
+
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
