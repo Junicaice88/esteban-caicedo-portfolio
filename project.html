@@ -1,102 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Project – Detail</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google model-viewer (para GLB) -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg:"#0b1220",
+            card:"#151b2b",
+            ink:"#e6e9f5",
+            dim:"#9aa3b2",
+            brand:{DEFAULT:"#4f6af3"}
+          },
+          borderRadius:{'2xl':'1.25rem'}
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background:#0b1220; color:#e6e9f5; }
+    .card { background: rgba(255,255,255,.06); }
+    .slider { position:relative; overflow:hidden; }
+    .slide { position:absolute; inset:0; opacity:0; transition:opacity .6s ease; }
+    .slide.active { opacity:1; }
+    .slide img, .slide video { width:100%; height:100%; object-fit:cover; display:block; }
+    .ctrl { position:absolute; top:50%; transform:translateY(-50%); z-index:3; background:rgba(0,0,0,.45); color:#fff; border-radius:8px; padding:6px 10px; cursor:pointer; user-select:none; opacity:.5; transition:opacity .2s; }
+    .ctrl:hover { opacity:1; }
+    .ctrl.left{ left:10px; } .ctrl.right{ right:10px; }
+    .dots{ position:absolute; bottom:10px; left:0; right:0; display:flex; justify-content:center; gap:6px; z-index:3; }
+    .dot{ width:8px; height:8px; border-radius:9999px; background:rgba(255,255,255,.35) }
+    .dot.active{ background:#fff; }
+  </style>
 </head>
-<body>
-  <div class="header">
-    <a href="index.html" class="back">← Back</a>
-  </div>
+<body class="font-sans">
+  <header class="max-w-6xl mx-auto px-6 py-6">
+    <a href="index.html" class="text-sm text-dim hover:text-ink">← Back</a>
+  </header>
 
-  <main class="container" id="root">
-    <h1 id="title">Project</h1>
-    <p id="desc" class="lead"></p>
+  <main id="root" class="max-w-6xl mx-auto px-6 pb-20"></main>
 
-    <div class="row">
-      <div class="viewer" id="viewerBox"></div>
-      <div class="media" id="mediaBox"></div>
-    </div>
-  </main>
+  <script>
+    const safe = p => (typeof p === 'string' ? encodeURI(p) : p);
 
-<script>
-const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
+    function mountSlider(box, media = [], height = 420, opts = {}) {
+      const autoplay = opts.autoplay ?? true;
+      const interval = opts.interval ?? 3500;
 
-function makeLayer(src){
-  const layer = document.createElement('div');
-  layer.className = 'slide-layer';
-  if(isVideo(src)){
-    const v = document.createElement('video');
-    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
-    layer.appendChild(v);
-  } else {
-    const img = document.createElement('img');
-    img.src = src; img.loading='lazy';
-    layer.appendChild(img);
-  }
-  return layer;
-}
+      box.classList.add('slider');
+      box.style.height = height + 'px';
 
-function mountSlider(container, sources, height=420){
-  container.className = 'slider';
-  container.style.height = height + 'px';
-  const a = makeLayer(sources[0]||''); a.classList.add('active');
-  const b = makeLayer(sources[1]||sources[0]||'');
-  container.append(a,b);
+      const a = document.createElement('div'); a.className='slide active';
+      const b = document.createElement('div'); b.className='slide';
+      box.append(a,b);
 
-  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
-  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
-  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
-  container.append(left,right,dots);
+      let i=0, useA=true, timer=null;
 
-  sources.forEach((_,i)=>{
-    const d = document.createElement('span');
-    d.className = 'dot' + (i===0?' active':'');
-    d.onclick = () => show(i);
-    dots.appendChild(d);
-  });
+      const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+      const right= document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+      const dots = document.createElement('div'); dots.className='dots';
+      box.append(left,right,dots);
 
-  let idx = 0, useA=true;
-  function show(n){
-    if(!sources.length) return;
-    idx = (n + sources.length) % sources.length;
-    const next = sources[idx];
-    const front = useA ? a : b;
-    const back  = useA ? b : a;
-    const fresh = makeLayer(next);
-    back.replaceChildren(...fresh.childNodes);
-    front.classList.remove('active');
-    back.classList.add('active');
-    useA = !useA;
-    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
-  }
-  left.onclick = ()=>show(idx-1);
-  right.onclick = ()=>show(idx+1);
-}
+      function render(el, src){
+        el.innerHTML='';
+        if (src.toLowerCase().endsWith('.mp4')) {
+          const v = document.createElement('video');
+          v.src = safe(src);
+          v.muted=true; v.loop=true; v.playsInline=true; v.autoplay=true;
+          v.oncanplay = ()=> v.play().catch(()=>{});
+          el.appendChild(v);
+        } else {
+          const img = document.createElement('img');
+          img.loading='lazy';
+          img.src = safe(src);
+          img.onerror = ()=> console.warn('IMG 404:', img.src);
+          el.appendChild(img);
+        }
+      }
 
-const qs = new URLSearchParams(location.search);
-const slug = qs.get('slug');
+      function paint(n){
+        const idx = ((n%media.length)+media.length)%media.length;
+        const nextSrc = media[idx];
+        const cur = useA ? a : b;
+        const nxt = useA ? b : a;
 
-fetch('projects.json').then(r=>r.json()).then(items=>{
-  const p = items.find(x=>x.slug===slug) || items[0];
-  document.getElementById('title').textContent = p.title;
-  document.getElementById('desc').textContent  = p.longDescription || p.description || '';
+        render(nxt, nextSrc);
+        cur.classList.remove('active');
+        nxt.classList.add('active');
+        useA = !useA;
 
-  // Media (images or videos)
-  const media = (p.media && p.media.length) ? p.media : (p.images || []);
-  if(media.length){
-    mountSlider(document.getElementById('mediaBox'), media, 420);
-  }
+        [...dots.children].forEach((d,k)=> d.className='dot'+(k===idx?' active':''));        
+        i = idx;
+      }
 
-  // 3D model (if provided)
-  if(p.model){
-    const vb = document.getElementById('viewerBox');
-    vb.innerHTML = `<model-viewer src="${p.model}" camera-controls autoplay style="width:100%;height:100%"></model-viewer>`;
-  }
-});
-</script>
+      media.forEach((_m,k)=>{
+        const d = document.createElement('span'); d.className='dot'+(k===0?' active':'');
+        d.onclick = ()=> paint(k);
+        dots.appendChild(d);
+      });
+
+      if (media.length) { render(a, media[0]); }
+
+      left.onclick = ()=> paint(i-1);
+      right.onclick = ()=> paint(i+1);
+
+      function start(){ if(autoplay && media.length>1 && !timer){ timer=setInterval(()=> paint(i+1), interval); } }
+      function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+      box.addEventListener('mouseenter', stop);
+      box.addEventListener('mouseleave', start);
+      start();
+    }
+
+    async function init(){
+      const params = new URLSearchParams(location.search);
+      const slug = params.get('slug') || '';
+      const res = await fetch('projects.json');
+      const items = await res.json();
+      const p = items.find(x=> x.slug === slug);
+      const root = document.getElementById('root');
+
+      if(!p){
+        root.innerHTML = `<div class="text-dim">Project not found.</div>`;
+        return;
+      }
+
+      // Title + description
+      const head = document.createElement('div');
+      head.innerHTML = `
+        <h1 class="text-3xl font-semibold mb-2">${p.title}</h1>
+        <p class="text-dim mb-6">${p.longDescription || p.description || ''}</p>
+      `;
+
+      // Layout: model (left) + media carousel (right)
+      const grid = document.createElement('div');
+      grid.className = 'grid lg:grid-cols-2 gap-6';
+
+      // 3D viewer
+      const modelWrap = document.createElement('div');
+      modelWrap.className = 'card rounded-2xl border border-white/10 overflow-hidden';
+      modelWrap.style.height = '420px';
+
+      if (p.model) {
+        const mv = document.createElement('model-viewer');
+        mv.src = safe(p.model);
+        mv.setAttribute('camera-controls','');
+        mv.setAttribute('shadow-intensity','1');
+        mv.setAttribute('exposure','1');
+        mv.setAttribute('style','width:100%;height:100%;background:#0e1526');
+        // fallback onerror (si hubiese)
+        mv.addEventListener('error', e => console.warn('GLB error:', e));
+        modelWrap.appendChild(mv);
+      } else {
+        modelWrap.innerHTML = `<div class="w-full h-full flex items-center justify-center text-dim">No 3D model.</div>`;
+      }
+
+      // Media carousel
+      const mediaWrap = document.createElement('div');
+      mediaWrap.className = 'card rounded-2xl border border-white/10 overflow-hidden';
+      const media = (p.images||[]).map(safe).concat(p.videos||[]);
+      mountSlider(mediaWrap, media, 420, {autoplay:true});
+
+      grid.append(modelWrap, mediaWrap);
+
+      // Tags
+      const tags = document.createElement('div');
+      tags.className = 'mt-6 flex flex-wrap gap-2';
+      (p.tags||[]).forEach(t=>{
+        const x = document.createElement('span');
+        x.className = 'px-3 py-1 rounded-full text-xs border border-white/10 bg-white/5';
+        x.textContent = t;
+        tags.appendChild(x);
+      });
+
+      root.append(head, grid, tags);
+    }
+
+    init();
+  </script>
 </body>
 </html>
