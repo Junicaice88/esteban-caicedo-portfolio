@@ -1,102 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Project – Detail</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-</head>
-<body>
-  <div class="header">
-    <a href="index.html" class="back">← Back</a>
-  </div>
-
-  <main class="container" id="root">
-    <h1 id="title">Project</h1>
-    <p id="desc" class="lead"></p>
-
-    <div class="row">
-      <div class="viewer" id="viewerBox"></div>
-      <div class="media" id="mediaBox"></div>
-    </div>
-  </main>
-
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Project</title><link rel="stylesheet" href="style.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"></script>
+</head><body>
+<nav class="nav"><h1>Esteban Caicedo</h1><div class="links"><a href="index.html">Projects</a><a href="https://www.linkedin.com" target="_blank" style="margin-left:18px">LinkedIn</a></div></nav>
+<main class="wrap" id="root"></main>
+<footer class="footer">© 2025 Esteban Caicedo • Built with TailwindCSS • Deployed on Netlify</footer>
 <script>
-const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
-
-function makeLayer(src){
-  const layer = document.createElement('div');
-  layer.className = 'slide-layer';
-  if(isVideo(src)){
-    const v = document.createElement('video');
-    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
-    layer.appendChild(v);
-  } else {
-    const img = document.createElement('img');
-    img.src = src; img.loading='lazy';
-    layer.appendChild(img);
+function mountSlider(container, sources=[], height=240, opts={}){
+  const autoplay = !!opts.autoplay, interval = opts.interval || 3000;
+  container.classList.add('slider'); container.style.height = height+'px';
+  const a = document.createElement('div'), b = document.createElement('div');
+  a.className='slide-layer active'; b.className='slide-layer';
+  const imgA=createMedia(sources[0]||''), imgB=createMedia(sources[1]||sources[0]||'');
+  a.appendChild(imgA); b.appendChild(imgB); container.append(a,b);
+  function createMedia(src){
+    if(!src) return document.createElement('div');
+    const url = encodeURI(src);
+    if(/\.(mp4|webm|ogg)$/i.test(url)){ const v=document.createElement('video'); v.src=url; v.muted=true; v.playsInline=true; v.autoplay=true; v.loop=true; v.controls=false; v.style.background='#000'; return v; }
+    const i=document.createElement('img'); i.src=url; i.loading='lazy'; i.alt=''; return i;
   }
-  return layer;
-}
-
-function mountSlider(container, sources, height=420){
-  container.className = 'slider';
-  container.style.height = height + 'px';
-  const a = makeLayer(sources[0]||''); a.classList.add('active');
-  const b = makeLayer(sources[1]||sources[0]||'');
-  container.append(a,b);
-
-  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
-  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
-  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
-  container.append(left,right,dots);
-
-  sources.forEach((_,i)=>{
-    const d = document.createElement('span');
-    d.className = 'dot' + (i===0?' active':'');
-    d.onclick = () => show(i);
-    dots.appendChild(d);
-  });
-
-  let idx = 0, useA=true;
+  let idx=0,useA=true,timer=null;
   function show(n){
-    if(!sources.length) return;
-    idx = (n + sources.length) % sources.length;
-    const next = sources[idx];
-    const front = useA ? a : b;
-    const back  = useA ? b : a;
-    const fresh = makeLayer(next);
-    back.replaceChildren(...fresh.childNodes);
-    front.classList.remove('active');
-    back.classList.add('active');
-    useA = !useA;
-    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
+    idx=(n+sources.length)%sources.length;
+    const nextSrc=sources[idx];
+    const target=useA?b:a; const active=useA?a:b;
+    target.replaceChildren(createMedia(nextSrc));
+    active.classList.remove('active'); target.classList.add('active'); useA=!useA;
+    if(dots) dots.childNodes.forEach((d,i)=> d.className='dot'+(i===idx?' active':''));
   }
-  left.onclick = ()=>show(idx-1);
-  right.onclick = ()=>show(idx+1);
+  let dots=null;
+  if(sources.length>1){
+    const left=document.createElement('div'), right=document.createElement('div');
+    left.className='ctrl left'; left.textContent='‹'; right.className='ctrl right'; right.textContent='›';
+    left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1); container.append(left,right);
+    dots=document.createElement('div'); dots.className='dots';
+    sources.forEach((_,i)=>{ const sp=document.createElement('span'); sp.className='dot'+(i===0?' active':''); sp.onclick=()=>show(i); dots.append(sp); });
+    container.append(dots);
+  }
+  const start=()=>{ if(autoplay && sources.length>1){ stop(); timer=setInterval(()=>show(idx+1), interval);} };
+  const stop = ()=>{ if(timer){ clearInterval(timer); timer=null; } };
+  container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start); start();
 }
-
-const qs = new URLSearchParams(location.search);
-const slug = qs.get('slug');
-
-fetch('projects.json').then(r=>r.json()).then(items=>{
-  const p = items.find(x=>x.slug===slug) || items[0];
-  document.getElementById('title').textContent = p.title;
-  document.getElementById('desc').textContent  = p.longDescription || p.description || '';
-
-  // Media (images or videos)
-  const media = (p.media && p.media.length) ? p.media : (p.images || []);
-  if(media.length){
-    mountSlider(document.getElementById('mediaBox'), media, 420);
-  }
-
-  // 3D model (if provided)
-  if(p.model){
-    const vb = document.getElementById('viewerBox');
-    vb.innerHTML = `<model-viewer src="${p.model}" camera-controls autoplay style="width:100%;height:100%"></model-viewer>`;
-  }
-});
 </script>
-</body>
-</html>
+<script type="module">
+const slug=new URLSearchParams(location.search).get('slug'); const root=document.getElementById('root');
+fetch('projects.json').then(r=>r.json()).then(items=>{
+  const p=items.find(x=>x.slug===slug);
+  if(!p){ root.innerHTML='<a class="back" href="index.html">← Back</a><h2>Project not found.</h2>'; return; }
+  const sources=(p.images&&p.images.length)?p.images:(p.videos||[]);
+  root.innerHTML=`<a class="back" href="index.html">← Back</a><h2 class="title>${p.title}</h2><p class="lead">${p.longDescription||p.description||''}</p>`;
+  const body=document.createElement('div'); body.className='two';
+  const viewer=document.createElement('div'); viewer.className='viewer'; viewer.id='viewer';
+  const gal=document.createElement('div'); mountSlider(gal, sources, 460, {autoplay:true});
+  body.append(viewer,gal); root.append(body);
+  if(p.tags&&p.tags.length){ const tg=document.createElement('p'); tg.className='caption'; tg.textContent='Tags: '+p.tags.join(' · '); root.append(tg);}
+  if(p.model){
+    const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0f1628);
+    const cam=new THREE.PerspectiveCamera(45, viewer.clientWidth/viewer.clientHeight, .1, 2e3); cam.position.set(2.6,1.6,3.3);
+    const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(viewer.clientWidth, viewer.clientHeight); viewer.append(renderer.domElement);
+    const hemi=new THREE.HemisphereLight(0xffffff,0x223344,1.0); scene.add(hemi);
+    const dir=new THREE.DirectionalLight(0xffffff,1.2); dir.position.set(2,3,4); scene.add(dir);
+    const grid=new THREE.GridHelper(10,10,0x334,0x223); grid.position.y=-.001; scene.add(grid);
+    const controls=new THREE.OrbitControls(cam, renderer.domElement); controls.enableDamping=true;
+    const loader=new THREE.GLTFLoader(); loader.load(encodeURI(p.model),(g)=>{scene.add(g.scene);});
+    const onR=()=>{ const w=viewer.clientWidth,h=viewer.clientHeight; cam.aspect=w/h; cam.updateProjectionMatrix(); renderer.setSize(w,h); }; addEventListener('resize', onR);
+    (function anim(){ controls.update(); renderer.render(scene,cam); requestAnimationFrame(anim); })(); 
+  } else { viewer.innerHTML='<div class="caption">3D viewer not available for this project.</div>'; }
+});
+</script></body></html>
