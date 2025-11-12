@@ -29,13 +29,24 @@
     "title": "Fifth Mill Practice",
     "slug": "fifth-mill-practice",
     "description": "CNC mill practice — three operations, roughing/finishing toolpaths; videos + 3D model viewer.",
-    "longDescription": "Fixture setup and toolpath practice: three operations with stock definition, safe retracts, roughing (adaptive) and finishing passes. Includes quick 3D viewer for the cleaned model.",
+    "longDescription": "Practice setup for a 3-axis CNC mill. Includes roughing and finishing strategies, workholding choices, and verification clips.",
     "tags": ["CAD", "Manufacturing", "3D"],
-    "media": [
+    "images": [
       "assets/videos/Fifth Mill Practice1.mp4",
       "assets/videos/Fifth Mill Practice2.mp4",
       "assets/videos/Fifth Mill Practice3.mp4"
     ],
     "model": "assets/models/Fifth Mill Practice.glb"
+  },
+  {
+    "title": "First Lathe Project",
+    "slug": "first-lathe-project",
+    "description": "Turning practice — single setup on manual lathe; includes videos and CAD reference model.",
+    "longDescription": "Introductory lathe operation project focusing on facing, turning, and chamfering. Shows workholding setup, spindle speeds, and cutting parameters.",
+    "tags": ["CAD", "Manufacturing", "Lathe"],
+    "images": [
+      "assets/videos/First Lathe Project.mp4"
+    ],
+    "model": "assets/models/First Lathe Project_CLEAN.glb"
   }
 ]

@@ -1,102 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Project – Detail</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script>
+    const safe = p => (typeof p === 'string' ? encodeURI(p) : p);
+    async function init(){
+      const params=new URLSearchParams(location.search);
+      const slug=params.get('slug');
+      const res=await fetch('projects.json');
+      const items=await res.json();
+      const p=items.find(x=>x.slug===slug);
+      const root=document.getElementById('root');
+      if(!p){root.textContent='Project not found';return;}
+      root.innerHTML=`<h1 class='text-2xl font-bold mb-2'>${p.title}</h1>
+      <p class='text-gray-400 mb-4'>${p.longDescription||p.description}</p>`;
+      if(p.model){
+        const mv=document.createElement('model-viewer');
+        mv.src=safe(p.model);
+        mv.setAttribute('camera-controls','');
+        mv.setAttribute('style','width:100%;height:400px;background:#111;border-radius:12px');
+        root.appendChild(mv);
+      }
+    }
+    window.onload=init;
+  </script>
 </head>
-<body>
-  <div class="header">
-    <a href="index.html" class="back">← Back</a>
-  </div>
-
-  <main class="container" id="root">
-    <h1 id="title">Project</h1>
-    <p id="desc" class="lead"></p>
-
-    <div class="row">
-      <div class="viewer" id="viewerBox"></div>
-      <div class="media" id="mediaBox"></div>
-    </div>
-  </main>
-
-<script>
-const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
-
-function makeLayer(src){
-  const layer = document.createElement('div');
-  layer.className = 'slide-layer';
-  if(isVideo(src)){
-    const v = document.createElement('video');
-    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
-    layer.appendChild(v);
-  } else {
-    const img = document.createElement('img');
-    img.src = src; img.loading='lazy';
-    layer.appendChild(img);
-  }
-  return layer;
-}
-
-function mountSlider(container, sources, height=420){
-  container.className = 'slider';
-  container.style.height = height + 'px';
-  const a = makeLayer(sources[0]||''); a.classList.add('active');
-  const b = makeLayer(sources[1]||sources[0]||'');
-  container.append(a,b);
-
-  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
-  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
-  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
-  container.append(left,right,dots);
-
-  sources.forEach((_,i)=>{
-    const d = document.createElement('span');
-    d.className = 'dot' + (i===0?' active':'');
-    d.onclick = () => show(i);
-    dots.appendChild(d);
-  });
-
-  let idx = 0, useA=true;
-  function show(n){
-    if(!sources.length) return;
-    idx = (n + sources.length) % sources.length;
-    const next = sources[idx];
-    const front = useA ? a : b;
-    const back  = useA ? b : a;
-    const fresh = makeLayer(next);
-    back.replaceChildren(...fresh.childNodes);
-    front.classList.remove('active');
-    back.classList.add('active');
-    useA = !useA;
-    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
-  }
-  left.onclick = ()=>show(idx-1);
-  right.onclick = ()=>show(idx+1);
-}
-
-const qs = new URLSearchParams(location.search);
-const slug = qs.get('slug');
-
-fetch('projects.json').then(r=>r.json()).then(items=>{
-  const p = items.find(x=>x.slug===slug) || items[0];
-  document.getElementById('title').textContent = p.title;
-  document.getElementById('desc').textContent  = p.longDescription || p.description || '';
-
-  // Media (images or videos)
-  const media = (p.media && p.media.length) ? p.media : (p.images || []);
-  if(media.length){
-    mountSlider(document.getElementById('mediaBox'), media, 420);
-  }
-
-  // 3D model (if provided)
-  if(p.model){
-    const vb = document.getElementById('viewerBox');
-    vb.innerHTML = `<model-viewer src="${p.model}" camera-controls autoplay style="width:100%;height:100%"></model-viewer>`;
-  }
-});
-</script>
+<body class="bg-gray-900 text-white">
+  <div class="max-w-5xl mx-auto py-10" id="root"></div>
 </body>
 </html>
