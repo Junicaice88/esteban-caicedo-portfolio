@@ -1,84 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Project — Esteban Caicedo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
+      borderRadius: { '2xl': '1.25rem' }
+    }}};
+  </script>
+  <style>
+    .slider { position: relative; overflow: hidden; }
+    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
+    .slide-layer img { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
+    .slide-layer.active { opacity:1; }
+    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
+    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
+    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
+    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
+    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
+    .dot.active { background: white; }
+  </style>
 
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Project</title>
-<link rel="stylesheet" href="style.css"/>
-<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-<body>
-  <div class="main">
-    <a href="index.html" class="sub">&larr; Back</a>
-    <h1 id="title">Project</h1>
-    <p id="desc" class="sub" style="margin-bottom:24px"></p>
+<body class="bg-bg text-ink font-sans">
+  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a>
+      <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand text-sm">LinkedIn</a>
+    </nav>
+  </header>
 
-    <div class="grid" style="grid-template-columns:repeat(2, minmax(0,1fr)); gap:22px;">
-      <div id="viewer"></div>
-      <div id="carousel" class="slider" style="height:420px"></div>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
+    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
+    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
+      </div>
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <div id="carousel" class="slider" style="height:360px"></div>
+      </div>
     </div>
-  </div>
+  </main>
 
-<script>
-function qs(k){return new URL(location.href).searchParams.get(k)||'';}
-async function main(){
-  const slug = qs('slug');
-  const items = await fetch('projects.json').then(r=>r.json());
-  const p = items.find(x=>x.slug===slug) || items[0];
-  document.getElementById('title').textContent = p.title;
-  document.getElementById('desc').textContent = "Interactive 3D preview and image gallery.";
+  <footer class="border-t border-white/5 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">
+      © 2025 Esteban Caicedo
+    </div>
+  </footer>
 
-  const car = document.getElementById('carousel');
-  (p.images||[]).forEach((src,i)=>{
-    const im = document.createElement('img');
-    im.src = src; im.className = 'slide'+(i===0?' active':'');
-    im.style.cssText = 'width:100%;height:100%;object-fit:cover';
-    car.appendChild(im);
-  });
-  const dots = document.createElement('div'); dots.className='dots';
-  dots.innerHTML = (p.images||[]).map((_,i)=>`<span class="dot ${i===0?'active':''}"></span>`).join('');
-  car.appendChild(dots);
-  let idx=0; if((p.images||[]).length>1){ setInterval(()=>{
-    const slides=car.querySelectorAll('.slide'); const ds=car.querySelectorAll('.dot');
-    slides[idx].classList.remove('active'); ds[idx].classList.remove('active');
-    idx=(idx+1)%slides.length; slides[idx].classList.add('active'); ds[idx].classList.add('active');
-  },3500); }
+  <script>
+    function mountSlider(container, images, height){
+      container.classList.add('slider');
+      container.style.height = height + 'px';
 
-  // viewer
-  const wrap = document.getElementById('viewer');
-  const w = wrap.clientWidth || 520, h = wrap.clientHeight || 420;
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, w/h, 0.01, 2000);
-  camera.position.set(0, 0.4, 3.5);
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(w,h); wrap.appendChild(renderer.domElement);
-  const hemi = new THREE.HemisphereLight(0xffffff,0x444444, 1.1); scene.add(hemi);
-  const dir = new THREE.DirectionalLight(0xffffff,0.9); dir.position.set(3,4,5); scene.add(dir);
-  const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping=true;
+      const a = document.createElement('div'); a.className='slide-layer active';
+      const b = document.createElement('div'); b.className='slide-layer';
+      const imgA = document.createElement('img'); const imgB = document.createElement('img');
+      imgA.src = images[0] || ''; imgB.src = images[1] || images[0] || '';
+      a.appendChild(imgA); b.appendChild(imgB);
+      container.append(a,b);
 
-  const grid = new THREE.GridHelper(10,10,0x88aaff,0x224466); grid.material.opacity=.12; grid.material.transparent=true; scene.add(grid);
+      let idx = 0, useA = true;
 
-  const loader = new THREE.GLTFLoader();
-  loader.load(p.model, (gltf)=>{
-    const root = gltf.scene; scene.add(root);
-    const box = new THREE.Box3().setFromObject(root);
-    const size = box.getSize(new THREE.Vector3()).length();
-    const center = box.getCenter(new THREE.Vector3());
-    const fitDist = size/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov)/2));
-    camera.position.copy(center).add(new THREE.Vector3(0, size*0.1, fitDist*1.1));
-    camera.near = size/100; camera.far=size*100; camera.updateProjectionMatrix();
-    controls.target.copy(center); controls.update();
-  }, undefined, (e)=>{ console.error('GLB load error:', e); });
+      function show(n){
+        idx = (n+images.length)%images.length;
+        const nextSrc = images[idx];
+        if(useA){ imgB.src = nextSrc; a.classList.remove('active'); b.classList.add('active'); }
+        else   { imgA.src = nextSrc; b.classList.remove('active'); a.classList.add('active'); }
+        useA = !useA;
+        updateDots();
+      }
 
-  function loop(){ controls.update(); renderer.render(scene,camera); requestAnimationFrame(loop); }
-  loop();
+      let dots = null;
+      function updateDots(){
+        if(!dots) return;
+        dots.childNodes.forEach((d,k)=> d.className='dot'+(k===idx?' active':''));
+      }
 
-  addEventListener('resize',()=>{
-    const W = wrap.clientWidth || 520, H = wrap.clientHeight || 420;
-    camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.setSize(W,H);
-  });
-}
-main();
-</script>
-</body></html>
+      if(images.length > 1){
+        const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+        const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+        dots = document.createElement('div'); dots.className='dots';
+        images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
+        container.append(left,right,dots);
+        left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
+
+        // Swipe/drag
+        let startX = null, dragging = false;
+        const threshold = 40;
+        const onStart = e => { startX = (e.touches? e.touches[0].clientX : e.clientX); dragging = true; };
+        const onMove = e => {
+          if(!dragging) return;
+          const x = (e.touches? e.touches[0].clientX : e.clientX);
+          if (Math.abs(x - startX) > threshold){
+            set(x < startX ? idx+1 : idx-1);
+            dragging = false;
+          }
+        };
+        const onEnd = () => { dragging = false; };
+        container.addEventListener('mousedown', onStart);
+        container.addEventListener('mousemove', onMove);
+        container.addEventListener('mouseup', onEnd);
+        container.addEventListener('mouseleave', onEnd);
+        container.addEventListener('touchstart', onStart, {passive:true});
+        container.addEventListener('touchmove', onMove, {passive:true});
+        container.addEventListener('touchend', onEnd);
+
+      }
+    }
+
+    function qs(k){return new URLSearchParams(location.search).get(k);}
+    const slug = qs('slug');
+
+    fetch('projects.json').then(r=>r.json()).then(items=>{
+      const p = items.find(x=>x.slug===slug);
+      if(!p){ document.getElementById('title').textContent='Project not found'; return; }
+
+      document.getElementById('title').textContent = p.title;
+      document.getElementById('desc').textContent = p.longDescription || 'Project description coming soon.';
+      const tg = document.getElementById('tags');
+      (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); });
+      if(p.model){ document.getElementById('mv').setAttribute('src', p.model); }
+      const imgs = (p.images && p.images.length)? p.images : (p.image? [p.image]:[]);
+      mountSlider(document.getElementById('carousel'), imgs, 360);
+    });
+  </script>
+</body>
+</html>
