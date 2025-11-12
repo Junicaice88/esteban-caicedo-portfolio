@@ -24,5 +24,18 @@
       "assets/images/Antonov3.jpg"
     ],
     "model": "assets/models/Antonov.glb"
+  },
+  {
+    "title": "Fifth Mill Practice",
+    "slug": "fifth-mill-practice",
+    "description": "CNC mill practice — three operations, roughing/finishing toolpaths; videos + 3D model viewer.",
+    "longDescription": "Fixture setup and toolpath practice: three operations with stock definition, safe retracts, roughing (adaptive) and finishing passes. Includes quick 3D viewer for the cleaned model.",
+    "tags": ["CAD", "Manufacturing", "3D"],
+    "media": [
+      "assets/videos/Fifth Mill Practice1.mp4",
+      "assets/videos/Fifth Mill Practice2.mp4",
+      "assets/videos/Fifth Mill Practice3.mp4"
+    ],
+    "model": "assets/models/Fifth Mill Practice.glb"
   }
 ]
