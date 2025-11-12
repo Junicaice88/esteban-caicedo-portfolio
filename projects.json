@@ -2,74 +2,27 @@
   {
     "title": "Airplane Model",
     "slug": "airplane-model",
-    "description": "Concept single-engine light aircraft model \u2014 3D viewer and renders.",
-    "longDescription": "WIP \u2014 Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
-    "tags": [
-      "CAD",
-      "Assembly",
-      "3D"
-    ],
+    "description": "Concept single-engine light aircraft model — interactive 3D viewer and renders.",
+    "longDescription": "WIP — Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
+    "tags": ["CAD", "Assembly", "3D"],
     "images": [
-      "assets/airplane_1.jpg",
-      "assets/airplane_2.jpg",
-      "assets/airplane_3.jpg"
+      "assets/images/airplane_1.jpg",
+      "assets/images/airplane_2.jpg",
+      "assets/images/airplane_3.jpg"
     ],
     "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
   {
-    "title": "C-Bond Composite Panels",
-    "slug": "c-bond-composites",
-    "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; industry collaboration.",
-    "longDescription": "Coming soon \u2014 fixtures, resin system, test matrix, and data capture approach.",
-    "tags": [
-      "Composites",
-      "Aerospace",
-      "Research"
-    ],
+    "title": "Antonov AN-10 — Surfaces-001",
+    "slug": "antonov-an10",
+    "description": "Surface-model practice: AN-10 transport aircraft — clean topology and renders.",
+    "longDescription": "First pass at the Antonov AN-10 using a surface-driven workflow (lofted skins, guide curves, and continuity checks).",
+    "tags": ["CAD", "Surfaces", "3D"],
     "images": [
-      "assets/c-bond.jpg"
-    ]
-  },
-  {
-    "title": "Plant Simulation \u2014 Throughput Optimization",
-    "slug": "plant-sim-throughput",
-    "description": "Simcenter model to explore buffer strategies and increase daily throughput.",
-    "longDescription": "Coming soon \u2014 KPIs, scenario design, and results summary.",
-    "tags": [
-      "Simulation",
-      "Manufacturing",
-      "Siemens"
+      "assets/images/antonov_1.jpg",
+      "assets/images/antonov_2.jpg",
+      "assets/images/antonov_3.jpg"
     ],
-    "images": [
-      "assets/plant-simulation.jpg"
-    ]
-  },
-  {
-    "title": "CFD ANSYS Simulations",
-    "slug": "cfd-ansys-collection",
-    "description": "2D/3D CFD exercises to study flow and pressure fields.",
-    "longDescription": "Coming soon \u2014 mesh strategy, boundary conditions, and validation.",
-    "tags": [
-      "CFD",
-      "ANSYS",
-      "FEA/CFD"
-    ],
-    "images": [
-      "assets/cfd.jpg"
-    ]
-  },
-  {
-    "title": "Proximity Sensor (Arduino)",
-    "slug": "proximity-sensor",
-    "description": "Prototype with LED + buzzer alerts developed for an avionics course.",
-    "longDescription": "Coming soon \u2014 schematic, BOM, and firmware overview.",
-    "tags": [
-      "Avionics",
-      "Arduino",
-      "Electronics"
-    ],
-    "images": [
-      "assets/proximity.jpg"
-    ]
+    "model": "assets/models/Antonov.glb"
   }
 ]
