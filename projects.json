@@ -2,63 +2,74 @@
   {
     "title": "Airplane Model",
     "slug": "airplane-model",
-    "description": "Concept single-engine light aircraft model — interactive 3D viewer and renders.",
-    "longDescription": "WIP — Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
-    "tags": ["CAD", "Assembly", "3D"],
+    "description": "Concept single-engine light aircraft model \u2014 3D viewer and renders.",
+    "longDescription": "WIP \u2014 Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
+    "tags": [
+      "CAD",
+      "Assembly",
+      "3D"
+    ],
     "images": [
-      "assets/images/Airplane Model1.jpg",
-      "assets/images/Airplane Model2.jpg",
-      "assets/images/Airplane Model3.jpg"
+      "assets/airplane_1.jpg",
+      "assets/airplane_2.jpg",
+      "assets/airplane_3.jpg"
     ],
     "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
   {
-    "title": "Antonov AN-10 — Surfaces-001",
-    "slug": "antonov-an10",
-    "description": "Surface-model practice: AN-10 transport aircraft — clean topology and renders.",
-    "longDescription": "First pass at the Antonov AN-10 using a surface-driven workflow (lofted skins, guide curves, and continuity checks).",
-    "tags": ["CAD", "Surfaces", "3D"],
+    "title": "C-Bond Composite Panels",
+    "slug": "c-bond-composites",
+    "description": "CFRP plates with honeycomb core for damage tolerance and repair efficiency studies; industry collaboration.",
+    "longDescription": "Coming soon \u2014 fixtures, resin system, test matrix, and data capture approach.",
+    "tags": [
+      "Composites",
+      "Aerospace",
+      "Research"
+    ],
     "images": [
-      "assets/images/Antonov1.jpg",
-      "assets/images/Antonov2.jpg",
-      "assets/images/Antonov3.jpg"
-    ],
-    "model": "assets/models/Antonov.glb"
+      "assets/c-bond.jpg"
+    ]
   },
   {
-    "title": "Fifth Mill Practice",
-    "slug": "fifth-mill-practice",
-    "description": "CNC mill practice — three operations, roughing/finishing toolpaths; videos + 3D model viewer.",
-    "longDescription": "Three ops demo. Videos show the sequence; GLB is the finished part.",
-    "tags": ["CAD", "Manufacturing", "3D"],
-    "videos": [
-      "assets/videos/Fifth Mill Practice1.mp4",
-      "assets/videos/Fifth Mill Practice2.mp4",
-      "assets/videos/Fifth Mill Practice3.mp4"
+    "title": "Plant Simulation \u2014 Throughput Optimization",
+    "slug": "plant-sim-throughput",
+    "description": "Simcenter model to explore buffer strategies and increase daily throughput.",
+    "longDescription": "Coming soon \u2014 KPIs, scenario design, and results summary.",
+    "tags": [
+      "Simulation",
+      "Manufacturing",
+      "Siemens"
     ],
-    "model": "assets/models/Fifth Mill Practice.glb"
+    "images": [
+      "assets/plant-simulation.jpg"
+    ]
   },
   {
-    "title": "First Lathe Project",
-    "slug": "first-lathe-project",
-    "description": "Basic lathe practice — turning operations + 3D model viewer.",
-    "longDescription": "Turning practice with a simple component; includes finished model.",
-    "tags": ["CAD", "Manufacturing", "3D"],
-    "videos": [
-      "assets/videos/First Lathe Project.mp4"
+    "title": "CFD ANSYS Simulations",
+    "slug": "cfd-ansys-collection",
+    "description": "2D/3D CFD exercises to study flow and pressure fields.",
+    "longDescription": "Coming soon \u2014 mesh strategy, boundary conditions, and validation.",
+    "tags": [
+      "CFD",
+      "ANSYS",
+      "FEA/CFD"
     ],
-    "model": "assets/models/First Lathe Project_CLEAN.glb"
+    "images": [
+      "assets/cfd.jpg"
+    ]
   },
   {
-    "title": "First Mill Practice",
-    "slug": "first-mill-practice",
-    "description": "Intro milling practice — 2 ops + 3D model viewer.",
-    "longDescription": "First milling exercise; roughing + finishing.",
-    "tags": ["CAD", "Manufacturing", "3D"],
-    "videos": [
-      "assets/videos/First Mill Practice1.mp4",
-      "assets/videos/First Mill Practice2.mp4"
+    "title": "Proximity Sensor (Arduino)",
+    "slug": "proximity-sensor",
+    "description": "Prototype with LED + buzzer alerts developed for an avionics course.",
+    "longDescription": "Coming soon \u2014 schematic, BOM, and firmware overview.",
+    "tags": [
+      "Avionics",
+      "Arduino",
+      "Electronics"
     ],
-    "model": "assets/models/First Mill Practice_CLEAN.glb"
+    "images": [
+      "assets/proximity.jpg"
+    ]
   }
 ]
