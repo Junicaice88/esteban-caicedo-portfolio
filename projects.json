@@ -29,9 +29,9 @@
     "title": "Fifth Mill Practice",
     "slug": "fifth-mill-practice",
     "description": "CNC mill practice — three operations, roughing/finishing toolpaths; videos + 3D model viewer.",
-    "longDescription": "Three-setup milling exercise documenting CAM strategy and surface finish evolution across operations.",
+    "longDescription": "Practice setup for a 3-axis CNC mill. Includes roughing and finishing strategies, workholding choices, and verification clips.",
     "tags": ["CAD", "Manufacturing", "3D"],
-    "videos": [
+    "images": [
       "assets/videos/Fifth Mill Practice1.mp4",
       "assets/videos/Fifth Mill Practice2.mp4",
       "assets/videos/Fifth Mill Practice3.mp4"
@@ -41,22 +41,12 @@
   {
     "title": "First Lathe Project",
     "slug": "first-lathe-project",
-    "description": "Intro lathe practice — basic turning ops with single video and 3D model viewer.",
-    "longDescription": "First turning exercise focusing on safety, tool approach, and dimensional control.",
-    "tags": ["CAD", "Manufacturing", "3D"],
-    "videos": ["assets/videos/First Lathe Project.mp4"],
-    "model": "assets/models/First Lathe Project_CLEAN.glb"
-  },
-  {
-    "title": "First Mill Practice",
-    "slug": "first-mill-practice",
-    "description": "CNC mill practice — facing, pocketing, contour; two videos + 3D model.",
-    "longDescription": "Two-setup CNC practice exploring feeds/speeds, stepdown/stepover, and verification versus the CAD model.",
-    "tags": ["CAD", "Manufacturing", "3D"],
-    "videos": [
-      "assets/videos/First Mill Practice1.mp4",
-      "assets/videos/First Mill Practice2.mp4"
+    "description": "Turning practice — single setup on manual lathe; includes videos and CAD reference model.",
+    "longDescription": "Introductory lathe operation project focusing on facing, turning, and chamfering. Shows workholding setup, spindle speeds, and cutting parameters.",
+    "tags": ["CAD", "Manufacturing", "Lathe"],
+    "images": [
+      "assets/videos/First Lathe Project.mp4"
     ],
-    "model": "assets/models/First Mill Practice.glb"
+    "model": "assets/models/First Lathe Project_CLEAN.glb"
   }
 ]

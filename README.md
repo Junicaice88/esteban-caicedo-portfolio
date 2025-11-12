@@ -1,15 +1,30 @@
-# Esteban Caicedo – Engineering Portfolio (code-only pack)
+# Esteban Caicedo — Engineering Projects
 
-This pack contains ONLY the site code (no `assets/` and no `projects.json`), so you can
-drop it into your repo without touching your existing assets folder or your data file.
+Portfolio con proyectos CAD/CAE, visor 3D interactivo (glTF/GLB) y galerías de imágenes y videos.
 
-Included:
-- index.html
-- project.html
-- style.css
-- README.md (this file)
+## Version v2.4.4
 
-How to use:
-1) In GitHub: **Add file → Upload files**, and drag these four files to the repo root.
-2) Commit e.g. `v2.4.3 — code-only refresh (keep existing assets & projects.json)`.
-3) Your current `assets/` and `projects.json` remain intact.
+### Proyectos actuales
+- Airplane Model
+- Antonov AN-10 — Surfaces-001
+- Fifth Mill Practice
+- First Lathe Project
+
+## Estructura
+/
+├─ index.html
+├─ project.html
+├─ projects.json
+├─ style.css
+├─ README.md
+└─ assets/
+   ├─ images/
+   ├─ videos/
+   └─ models/
+
+## Cómo subir (GitHub + Netlify)
+1. Descomprime el ZIP.
+2. Repo → Add file → Upload files.
+3. Arrastra todo (incluida la carpeta assets/).
+4. Commit: v2.4.4 – Added “First Lathe Project”.
+5. Netlify redeploy.
