@@ -1,154 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Project • Viewer</title>
-  <link rel="stylesheet" href="style.css"/>
-
-  <!-- Web Component for GLB viewer -->
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-
-  <style>
-    /* ajustes mínimos por si tu style.css es distinto */
-    .wrap {max-width:1200px; margin:0 auto; padding:24px;}
-    .grid-2 {display:grid; grid-template-columns:1fr 1fr; gap:24px;}
-    .back {display:inline-flex; gap:.5rem; align-items:center; margin-bottom:16px; text-decoration:none;}
-    .viewer {background:#121722; border-radius:16px; padding:8px; min-height:420px}
-    model-viewer {width:100%; height:520px; background:#0d1220; border-radius:12px}
-    .panel {background:#121722; border-radius:16px; padding:16px}
-    .title {font-size:28px; font-weight:700; margin:8px 0}
-    .desc {opacity:.85; line-height:1.6}
-    .tags {display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
-    .tags span {background:#1c2540; color:#c7d2fe; padding:6px 10px; border-radius:999px; font-size:.85rem}
-    .slider {position:relative; border-radius:12px; overflow:hidden; margin-top:16px}
-    .slider img {display:none; width:100%; height:320px; object-fit:cover}
-    .slider img.active {display:block}
-    .nav {position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); color:#fff; border:0; width:36px; height:36px; border-radius:10px; cursor:pointer}
-    .nav.left {left:10px} .nav.right {right:10px}
-    .dots {position:absolute; left:0; right:0; bottom:10px; display:flex; gap:8px; justify-content:center}
-    .dots span {width:8px; height:8px; border-radius:999px; background:#6b7280; opacity:.7}
-    .dots span.on {background:#a5b4fc; opacity:1}
-    .videos {display:grid; gap:12px; margin-top:14px}
-    .videos video {width:100%; border-radius:12px; background:#0d1220}
-    @media (max-width: 980px){ .grid-2 {grid-template-columns:1fr} model-viewer{height:420px} }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <a href="index.html" class="back">← Back</a>
-
-    <div id="meta"></div>
-
-    <section class="grid-2" style="margin-top:12px">
-      <!-- 3D viewer -->
-      <div class="viewer">
-        <model-viewer id="mv"
-          src=""
-          ar
-          ar-modes="webxr scene-viewer quick-look"
-          camera-controls
-          touch-action="pan-y"
-          autoplay
-          exposure="1.0"
-          shadow-intensity="0.6"
-          environment-image="neutral"
-          poster="assets/images/Airplane Model1.jpg">
-        </model-viewer>
-      </div>
-
-      <!-- Images + Videos -->
-      <div class="panel">
-        <div class="slider" id="slider"></div>
-        <div class="videos" id="videos"></div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    // ------- CONFIG -------
-    const VERSION = '250';                         // bump si cambias algo
-    const PROJECTS_URL = `projects.json?v=${VERSION}`;
-
-    // ------- UTILS -------
-    const qs = (s, r=document) => r.querySelector(s);
-    const qsa = (s, r=document) => [...r.querySelectorAll(s)];
-    const getParam = (k) => new URLSearchParams(location.search).get(k);
-
-    // ------- MAIN --------
-    (async function boot(){
-      const slug = getParam('slug');
-      if(!slug){ location.href = 'index.html'; return; }
-
-      let project;
-      try{
-        const res = await fetch(PROJECTS_URL, {cache:'no-store'});
-        const data = await res.json();
-        project = data.find(p => p.slug === slug);
-      }catch(e){ console.error(e); }
-
-      if(!project){
-        qs('#meta').innerHTML = `<h1 class="title">Project not found</h1>`;
-        return;
-      }
-
-      // Meta (title + description + tags)
-      qs('#meta').innerHTML = `
-        <h1 class="title">${project.title}</h1>
-        <p class="desc">${project.longDescription || project.description || ''}</p>
-        <div class="tags">
-          ${(project.tags||[]).map(t => `<span>${t}</span>`).join('')}
-        </div>
-      `;
-
-      // 3D model
-      const mv = qs('#mv');
-      if (project.model){
-        // agrega versión para evitar caches
-        mv.src = `${project.model}?v=${VERSION}`;
-      }else{
-        mv.parentElement.innerHTML = `<div class="panel"><p>No 3D model for this project.</p></div>`;
-      }
-
-      // Images slider
-      const images = project.images || [];
-      mountSlider(qs('#slider'), images.map(src => `${src}?v=${VERSION}`), project.title);
-
-      // Videos (opcional)
-      const vids = project.videos || [];
-      const vd = qs('#videos');
-      if (vids.length){
-        vd.innerHTML = vids.map(v =>
-          `<video controls preload="metadata" src="${v}?v=${VERSION}"></video>`
-        ).join('');
-      }
-    })();
-
-    // ------- SLIDER -------
-    function mountSlider(root, imgs, altBase){
-      root.innerHTML = `
-        ${imgs.map((src,i)=> `<img loading="lazy" src="${src}" alt="${altBase} ${i+1}" ${i? '' : 'class="active"'}>`).join('')}
-        ${imgs.length>1 ? `
-          <button class="nav left" aria-label="Previous">‹</button>
-          <button class="nav right" aria-label="Next">›</button>
-          <div class="dots">${imgs.map((_,i)=>`<span ${i? '' : 'class="on"'}></span>`).join('')}</div>
-        `:''}
-      `;
-
-      const $imgs = qsa('img', root);
-      const $dots = qsa('.dots span', root);
-      if($imgs.length<=1) return;
-
-      let i = 0;
-      const show = (n)=>{
-        i = (n+$imgs.length)%$imgs.length;
-        $imgs.forEach((im,k)=>im.classList.toggle('active',k===i));
-        $dots.forEach((d,k)=>d.classList.toggle('on',k===i));
-      };
-      root.querySelector('.left').onclick = ()=>show(i-1);
-      root.querySelector('.right').onclick = ()=>show(i+1);
-      $dots.forEach((d,k)=> d.onclick = ()=> show(k));
-    }
-  </script>
-</body>
-</html>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Project</title><link rel="stylesheet" href="style.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"></script>
+</head><body>
+<nav class="nav"><h1>Esteban Caicedo</h1><div class="links"><a href="index.html">Projects</a><a href="https://www.linkedin.com" target="_blank" style="margin-left:18px">LinkedIn</a></div></nav>
+<main class="wrap" id="root"></main>
+<footer class="footer">© 2025 Esteban Caicedo • Built with TailwindCSS • Deployed on Netlify</footer>
+<script>
+function mountSlider(container, sources=[], height=240, opts={}){
+  const autoplay = !!opts.autoplay, interval = opts.interval || 3000;
+  container.classList.add('slider'); container.style.height = height+'px';
+  const a = document.createElement('div'), b = document.createElement('div');
+  a.className='slide-layer active'; b.className='slide-layer';
+  const imgA=createMedia(sources[0]||''), imgB=createMedia(sources[1]||sources[0]||'');
+  a.appendChild(imgA); b.appendChild(imgB); container.append(a,b);
+  function createMedia(src){
+    if(!src) return document.createElement('div');
+    const url = encodeURI(src);
+    if(/\.(mp4|webm|ogg)$/i.test(url)){ const v=document.createElement('video'); v.src=url; v.muted=true; v.playsInline=true; v.autoplay=true; v.loop=true; v.controls=false; v.style.background='#000'; return v; }
+    const i=document.createElement('img'); i.src=url; i.loading='lazy'; i.alt=''; return i;
+  }
+  let idx=0,useA=true,timer=null;
+  function show(n){
+    idx=(n+sources.length)%sources.length;
+    const nextSrc=sources[idx];
+    const target=useA?b:a; const active=useA?a:b;
+    target.replaceChildren(createMedia(nextSrc));
+    active.classList.remove('active'); target.classList.add('active'); useA=!useA;
+    if(dots) dots.childNodes.forEach((d,i)=> d.className='dot'+(i===idx?' active':''));
+  }
+  let dots=null;
+  if(sources.length>1){
+    const left=document.createElement('div'), right=document.createElement('div');
+    left.className='ctrl left'; left.textContent='‹'; right.className='ctrl right'; right.textContent='›';
+    left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1); container.append(left,right);
+    dots=document.createElement('div'); dots.className='dots';
+    sources.forEach((_,i)=>{ const sp=document.createElement('span'); sp.className='dot'+(i===0?' active':''); sp.onclick=()=>show(i); dots.append(sp); });
+    container.append(dots);
+  }
+  const start=()=>{ if(autoplay && sources.length>1){ stop(); timer=setInterval(()=>show(idx+1), interval);} };
+  const stop = ()=>{ if(timer){ clearInterval(timer); timer=null; } };
+  container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start); start();
+}
+</script>
+<script type="module">
+const slug=new URLSearchParams(location.search).get('slug'); const root=document.getElementById('root');
+fetch('projects.json').then(r=>r.json()).then(items=>{
+  const p=items.find(x=>x.slug===slug);
+  if(!p){ root.innerHTML='<a class="back" href="index.html">← Back</a><h2>Project not found.</h2>'; return; }
+  const sources=(p.images&&p.images.length)?p.images:(p.videos||[]);
+  root.innerHTML=`<a class="back" href="index.html">← Back</a><h2 class="title>${p.title}</h2><p class="lead">${p.longDescription||p.description||''}</p>`;
+  const body=document.createElement('div'); body.className='two';
+  const viewer=document.createElement('div'); viewer.className='viewer'; viewer.id='viewer';
+  const gal=document.createElement('div'); mountSlider(gal, sources, 460, {autoplay:true});
+  body.append(viewer,gal); root.append(body);
+  if(p.tags&&p.tags.length){ const tg=document.createElement('p'); tg.className='caption'; tg.textContent='Tags: '+p.tags.join(' · '); root.append(tg);}
+  if(p.model){
+    const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0f1628);
+    const cam=new THREE.PerspectiveCamera(45, viewer.clientWidth/viewer.clientHeight, .1, 2e3); cam.position.set(2.6,1.6,3.3);
+    const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(viewer.clientWidth, viewer.clientHeight); viewer.append(renderer.domElement);
+    const hemi=new THREE.HemisphereLight(0xffffff,0x223344,1.0); scene.add(hemi);
+    const dir=new THREE.DirectionalLight(0xffffff,1.2); dir.position.set(2,3,4); scene.add(dir);
+    const grid=new THREE.GridHelper(10,10,0x334,0x223); grid.position.y=-.001; scene.add(grid);
+    const controls=new THREE.OrbitControls(cam, renderer.domElement); controls.enableDamping=true;
+    const loader=new THREE.GLTFLoader(); loader.load(encodeURI(p.model),(g)=>{scene.add(g.scene);});
+    const onR=()=>{ const w=viewer.clientWidth,h=viewer.clientHeight; cam.aspect=w/h; cam.updateProjectionMatrix(); renderer.setSize(w,h); }; addEventListener('resize', onR);
+    (function anim(){ controls.update(); renderer.render(scene,cam); requestAnimationFrame(anim); })(); 
+  } else { viewer.innerHTML='<div class="caption">3D viewer not available for this project.</div>'; }
+});
+</script></body></html>
