@@ -1,81 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Project • Detail</title>
+  <title>Project • Viewer</title>
   <link rel="stylesheet" href="style.css"/>
+
+  <!-- Web Component for GLB viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    /* ajustes mínimos por si tu style.css es distinto */
+    .wrap {max-width:1200px; margin:0 auto; padding:24px;}
+    .grid-2 {display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+    .back {display:inline-flex; gap:.5rem; align-items:center; margin-bottom:16px; text-decoration:none;}
+    .viewer {background:#121722; border-radius:16px; padding:8px; min-height:420px}
+    model-viewer {width:100%; height:520px; background:#0d1220; border-radius:12px}
+    .panel {background:#121722; border-radius:16px; padding:16px}
+    .title {font-size:28px; font-weight:700; margin:8px 0}
+    .desc {opacity:.85; line-height:1.6}
+    .tags {display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .tags span {background:#1c2540; color:#c7d2fe; padding:6px 10px; border-radius:999px; font-size:.85rem}
+    .slider {position:relative; border-radius:12px; overflow:hidden; margin-top:16px}
+    .slider img {display:none; width:100%; height:320px; object-fit:cover}
+    .slider img.active {display:block}
+    .nav {position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); color:#fff; border:0; width:36px; height:36px; border-radius:10px; cursor:pointer}
+    .nav.left {left:10px} .nav.right {right:10px}
+    .dots {position:absolute; left:0; right:0; bottom:10px; display:flex; gap:8px; justify-content:center}
+    .dots span {width:8px; height:8px; border-radius:999px; background:#6b7280; opacity:.7}
+    .dots span.on {background:#a5b4fc; opacity:1}
+    .videos {display:grid; gap:12px; margin-top:14px}
+    .videos video {width:100%; border-radius:12px; background:#0d1220}
+    @media (max-width: 980px){ .grid-2 {grid-template-columns:1fr} model-viewer{height:420px} }
+  </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="brand"><a href="index.html" class="back">← Back</a></div>
-  <nav><a href="index.html">Projects</a><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></nav>
-</header>
+  <div class="wrap">
+    <a href="index.html" class="back">← Back</a>
 
-<main class="container">
-  <div id="wrap" class="detail">
-    <div id="viewerCol" class="viewerCol"></div>
-    <div id="mediaCol" class="mediaCol"></div>
+    <div id="meta"></div>
+
+    <section class="grid-2" style="margin-top:12px">
+      <!-- 3D viewer -->
+      <div class="viewer">
+        <model-viewer id="mv"
+          src=""
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          camera-controls
+          touch-action="pan-y"
+          autoplay
+          exposure="1.0"
+          shadow-intensity="0.6"
+          environment-image="neutral"
+          poster="assets/images/Airplane Model1.jpg">
+        </model-viewer>
+      </div>
+
+      <!-- Images + Videos -->
+      <div class="panel">
+        <div class="slider" id="slider"></div>
+        <div class="videos" id="videos"></div>
+      </div>
+    </section>
   </div>
-</main>
 
-<footer class="footer">© 2025 Esteban Caicedo</footer>
+  <script>
+    // ------- CONFIG -------
+    const VERSION = '250';                         // bump si cambias algo
+    const PROJECTS_URL = `projects.json?v=${VERSION}`;
 
-<script>
-const qs = new URLSearchParams(location.search);
-const slug = qs.get('slug')||'';
+    // ------- UTILS -------
+    const qs = (s, r=document) => r.querySelector(s);
+    const qsa = (s, r=document) => [...r.querySelectorAll(s)];
+    const getParam = (k) => new URLSearchParams(location.search).get(k);
 
-async function start(){
-  const res = await fetch('projects.json', {cache:'no-store'});
-  const projects = await res.json();
-  const p = projects.find(x=>x.slug===slug) || projects[0];
-  document.title = p.title + ' • Project';
-  document.querySelector('.brand').insertAdjacentHTML('beforeend', ' — '+p.title);
+    // ------- MAIN --------
+    (async function boot(){
+      const slug = getParam('slug');
+      if(!slug){ location.href = 'index.html'; return; }
 
-  // viewer
-  const viewerCol = document.getElementById('viewerCol');
-  if(p.model){
-    viewerCol.innerHTML = `<model-viewer src="${p.model}" ar ar-modes="webxr scene-viewer quick-look"
-      camera-controls exposure="1.1" shadow-intensity="0.4" style="width:100%;height:520px;background:var(--panel);border-radius:12px;"
-      poster="${(p.images&&p.images[0])||''}" alt="${p.title} 3D model"></model-viewer>`;
-  }else{
-    viewerCol.innerHTML = '<div class="empty">No 3D model provided for this project.</div>';
-  }
+      let project;
+      try{
+        const res = await fetch(PROJECTS_URL, {cache:'no-store'});
+        const data = await res.json();
+        project = data.find(p => p.slug === slug);
+      }catch(e){ console.error(e); }
 
-  // media slider
-  const mediaCol = document.getElementById('mediaCol');
-  const imgs = p.images||[];
-  const vids = (p.videos||[]);
-  mediaCol.innerHTML = `
-    <h2>${p.title}</h2>
-    <p>${p.longDescription || p.description || ''}</p>
-    <div class="slider big">
-      ${imgs.map((src,i)=>`<img src="${src}" alt="${p.title} ${i+1}" ${i===0?'class="active"':''} loading="lazy">`).join('')}
-      ${vids.map((src)=>`<video src="${src}" controls playsinline></video>`).join('')}
-      <button class="nav left" aria-label="Prev">‹</button>
-      <button class="nav right" aria-label="Next">›</button>
-      <div class="dots">${imgs.map((_,i)=>`<span ${i===0?'class="on"':''}></span>`).join('')}</div>
-    </div>`;
-  mountSlider(mediaCol.querySelector('.slider'));
-}
+      if(!project){
+        qs('#meta').innerHTML = `<h1 class="title">Project not found</h1>`;
+        return;
+      }
 
-function mountSlider(root){
-  const imgs = [...root.querySelectorAll('img')];
-  if(!imgs.length){ root.querySelector('.left').style.display='none'; root.querySelector('.right').style.display='none'; return; }
-  const dots = [...root.querySelectorAll('.dots span')];
-  let i = 0;
-  const show = (n)=>{
-    i = (n+imgs.length)%imgs.length;
-    imgs.forEach((img,k)=>img.classList.toggle('active',k===i));
-    dots.forEach((d,k)=>d.classList.toggle('on',k===i));
-  };
-  root.querySelector('.left').onclick = ()=> show(i-1);
-  root.querySelector('.right').onclick = ()=> show(i+1);
-  dots.forEach((d,k)=> d.onclick = ()=> show(k));
-}
+      // Meta (title + description + tags)
+      qs('#meta').innerHTML = `
+        <h1 class="title">${project.title}</h1>
+        <p class="desc">${project.longDescription || project.description || ''}</p>
+        <div class="tags">
+          ${(project.tags||[]).map(t => `<span>${t}</span>`).join('')}
+        </div>
+      `;
 
-start();
-</script>
+      // 3D model
+      const mv = qs('#mv');
+      if (project.model){
+        // agrega versión para evitar caches
+        mv.src = `${project.model}?v=${VERSION}`;
+      }else{
+        mv.parentElement.innerHTML = `<div class="panel"><p>No 3D model for this project.</p></div>`;
+      }
+
+      // Images slider
+      const images = project.images || [];
+      mountSlider(qs('#slider'), images.map(src => `${src}?v=${VERSION}`), project.title);
+
+      // Videos (opcional)
+      const vids = project.videos || [];
+      const vd = qs('#videos');
+      if (vids.length){
+        vd.innerHTML = vids.map(v =>
+          `<video controls preload="metadata" src="${v}?v=${VERSION}"></video>`
+        ).join('');
+      }
+    })();
+
+    // ------- SLIDER -------
+    function mountSlider(root, imgs, altBase){
+      root.innerHTML = `
+        ${imgs.map((src,i)=> `<img loading="lazy" src="${src}" alt="${altBase} ${i+1}" ${i? '' : 'class="active"'}>`).join('')}
+        ${imgs.length>1 ? `
+          <button class="nav left" aria-label="Previous">‹</button>
+          <button class="nav right" aria-label="Next">›</button>
+          <div class="dots">${imgs.map((_,i)=>`<span ${i? '' : 'class="on"'}></span>`).join('')}</div>
+        `:''}
+      `;
+
+      const $imgs = qsa('img', root);
+      const $dots = qsa('.dots span', root);
+      if($imgs.length<=1) return;
+
+      let i = 0;
+      const show = (n)=>{
+        i = (n+$imgs.length)%$imgs.length;
+        $imgs.forEach((im,k)=>im.classList.toggle('active',k===i));
+        $dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+      };
+      root.querySelector('.left').onclick = ()=>show(i-1);
+      root.querySelector('.right').onclick = ()=>show(i+1);
+      $dots.forEach((d,k)=> d.onclick = ()=> show(k));
+    }
+  </script>
 </body>
 </html>
