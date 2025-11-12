@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esteban Caicedo • Engineering Projects</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Esteban Caicedo</div>
+  <nav><a href="index.html" class="active">Projects</a><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></nav>
+</header>
+
+<main class="container">
+  <h1>Engineering Projects</h1>
+  <p class="sub">Portfolio with CAD/CAE projects, interactive 3D models, and mixed‑media galleries.</p>
+
+  <section id="grid" class="grid"></section>
+</main>
+
+<footer class="footer">© 2025 Esteban Caicedo • Built for static hosting</footer>
+
+<script>
+async function loadProjects(){
+  const res = await fetch('projects.json', {cache:'no-store'});
+  const projects = await res.json();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for(const p of projects){
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="slider">
+        ${ (p.images||[]).map((src,i)=>`<img src="${src}" alt="${p.title} ${i+1}" ${i===0?'class="active"':''} loading="lazy">`).join('') }
+        <button class="nav left" aria-label="Prev">‹</button>
+        <button class="nav right" aria-label="Next">›</button>
+        <div class="dots">${(p.images||[]).map((_,i)=>`<span ${i===0?'class="on"':''}></span>`).join('')}</div>
+      </div>
+      <div class="meta">
+        <h3>${p.title}</h3>
+        <p>${p.description||''}</p>
+        <div class="tags">${(p.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div>
+        <a class="btn" href="project.html?slug=${encodeURIComponent(p.slug)}">Open</a>
+      </div>`;
+    grid.appendChild(card);
+    mountSlider(card.querySelector('.slider'));
+  }
+}
+
+function mountSlider(root){
+  const imgs = [...root.querySelectorAll('img')];
+  const dots = [...root.querySelectorAll('.dots span')];
+  let i = 0;
+  const show = (n)=>{
+    i = (n+imgs.length)%imgs.length;
+    imgs.forEach((img,k)=>img.classList.toggle('active',k===i));
+    dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+  };
+  root.querySelector('.left').onclick = ()=> show(i-1);
+  root.querySelector('.right').onclick = ()=> show(i+1);
+  dots.forEach((d,k)=> d.onclick = ()=> show(k));
+}
+
+loadProjects();
+</script>
+</body>
+</html>

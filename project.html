@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project • Detail</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><a href="index.html" class="back">← Back</a></div>
+  <nav><a href="index.html">Projects</a><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></nav>
+</header>
+
+<main class="container">
+  <div id="wrap" class="detail">
+    <div id="viewerCol" class="viewerCol"></div>
+    <div id="mediaCol" class="mediaCol"></div>
+  </div>
+</main>
+
+<footer class="footer">© 2025 Esteban Caicedo</footer>
+
+<script>
+const qs = new URLSearchParams(location.search);
+const slug = qs.get('slug')||'';
+
+async function start(){
+  const res = await fetch('projects.json', {cache:'no-store'});
+  const projects = await res.json();
+  const p = projects.find(x=>x.slug===slug) || projects[0];
+  document.title = p.title + ' • Project';
+  document.querySelector('.brand').insertAdjacentHTML('beforeend', ' — '+p.title);
+
+  // viewer
+  const viewerCol = document.getElementById('viewerCol');
+  if(p.model){
+    viewerCol.innerHTML = `<model-viewer src="${p.model}" ar ar-modes="webxr scene-viewer quick-look"
+      camera-controls exposure="1.1" shadow-intensity="0.4" style="width:100%;height:520px;background:var(--panel);border-radius:12px;"
+      poster="${(p.images&&p.images[0])||''}" alt="${p.title} 3D model"></model-viewer>`;
+  }else{
+    viewerCol.innerHTML = '<div class="empty">No 3D model provided for this project.</div>';
+  }
+
+  // media slider
+  const mediaCol = document.getElementById('mediaCol');
+  const imgs = p.images||[];
+  const vids = (p.videos||[]);
+  mediaCol.innerHTML = `
+    <h2>${p.title}</h2>
+    <p>${p.longDescription || p.description || ''}</p>
+    <div class="slider big">
+      ${imgs.map((src,i)=>`<img src="${src}" alt="${p.title} ${i+1}" ${i===0?'class="active"':''} loading="lazy">`).join('')}
+      ${vids.map((src)=>`<video src="${src}" controls playsinline></video>`).join('')}
+      <button class="nav left" aria-label="Prev">‹</button>
+      <button class="nav right" aria-label="Next">›</button>
+      <div class="dots">${imgs.map((_,i)=>`<span ${i===0?'class="on"':''}></span>`).join('')}</div>
+    </div>`;
+  mountSlider(mediaCol.querySelector('.slider'));
+}
+
+function mountSlider(root){
+  const imgs = [...root.querySelectorAll('img')];
+  if(!imgs.length){ root.querySelector('.left').style.display='none'; root.querySelector('.right').style.display='none'; return; }
+  const dots = [...root.querySelectorAll('.dots span')];
+  let i = 0;
+  const show = (n)=>{
+    i = (n+imgs.length)%imgs.length;
+    imgs.forEach((img,k)=>img.classList.toggle('active',k===i));
+    dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+  };
+  root.querySelector('.left').onclick = ()=> show(i-1);
+  root.querySelector('.right').onclick = ()=> show(i+1);
+  dots.forEach((d,k)=> d.onclick = ()=> show(k));
+}
+
+start();
+</script>
+</body>
+</html>
