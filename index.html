@@ -1,106 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Esteban Caicedo • Engineering Projects</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header class="topbar">
-    <div class="brand">Esteban Caicedo</div>
-    <nav>
-      <a href="index.html" class="active">Projects</a>
-      <a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
-    </nav>
-  </header>
-
-  <main class="container">
-    <h1>Engineering Projects</h1>
-    <p class="sub">
-      Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.
-    </p>
-
-    <section id="grid" class="grid"></section>
-  </main>
-
-  <footer class="footer">
-    © 2025 Esteban Caicedo • Built with TailwindCSS-style layout
-  </footer>
-
-  <script>
-    // Cache-busting: if you redeploy, change the version number here
-    const PROJECTS_URL = 'projects.json?v=250';
-
-    async function loadProjects() {
-      try {
-        const res = await fetch(PROJECTS_URL, { cache: 'no-store' });
-        const projects = await res.json();
-        renderProjects(projects);
-      } catch (err) {
-        console.error('Error loading projects.json', err);
-      }
-    }
-
-    function renderProjects(projects) {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
-
-      projects.forEach((p) => {
-        const card = document.createElement('article');
-        card.className = 'card';
-
-        card.innerHTML = `
-          <div class="slider">
-            ${(p.images || [])
-              .map(
-                (src, i) =>
-                  `<img src="${src}" alt="${p.title} ${i + 1}" ${
-                    i === 0 ? 'class="active"' : ''
-                  } loading="lazy">`
-              )
-              .join('')}
-            <button class="nav left" aria-label="Previous">‹</button>
-            <button class="nav right" aria-label="Next">›</button>
-            <div class="dots">
-              ${(p.images || [])
-                .map((_, i) => `<span ${i === 0 ? 'class="on"' : ''}></span>`)
-                .join('')}
-            </div>
-          </div>
-          <div class="meta">
-            <h3>${p.title}</h3>
-            <p>${p.description || ''}</p>
-            <div class="tags">
-              ${(p.tags || []).map((t) => `<span>${t}</span>`).join('')}
-            </div>
-            <a class="btn" href="project.html?slug=${encodeURIComponent(
-              p.slug
-            )}">Open</a>
-          </div>
-        `;
-        grid.appendChild(card);
-        mountSlider(card.querySelector('.slider'));
-      });
-    }
-
-    function mountSlider(root) {
-      const imgs = [...root.querySelectorAll('img')];
-      const dots = [...root.querySelectorAll('.dots span')];
-      let i = 0;
-
-      const show = (n) => {
-        i = (n + imgs.length) % imgs.length;
-        imgs.forEach((img, k) => img.classList.toggle('active', k === i));
-        dots.forEach((d, k) => d.classList.toggle('on', k === i));
-      };
-
-      root.querySelector('.left').onclick = () => show(i - 1);
-      root.querySelector('.right').onclick = () => show(i + 1);
-      dots.forEach((d, k) => (d.onclick = () => show(k)));
-    }
-
-    loadProjects();
-  </script>
-</body>
-</html>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Engineering Projects</title><link rel="stylesheet" href="style.css"/></head><body>
+<nav class="nav"><h1>Esteban Caicedo</h1><div class="links"><a href="index.html">Projects</a><a href="https://www.linkedin.com" target="_blank" style="margin-left:18px">LinkedIn</a></div></nav>
+<main class="wrap"><h2 class="title">Engineering Projects</h2><p class="lead">Portfolio with CAD/CAE projects, interactive 3D models, and mixed‑media galleries.</p><div id="grid" class="grid"></div></main>
+<footer class="footer">© 2025 Esteban Caicedo • Built with TailwindCSS • Deployed on Netlify</footer>
+<script>
+function mountSlider(container, sources=[], height=240, opts={}){
+  const autoplay = !!opts.autoplay, interval = opts.interval || 3000;
+  container.classList.add('slider'); container.style.height = height+'px';
+  const a = document.createElement('div'), b = document.createElement('div');
+  a.className='slide-layer active'; b.className='slide-layer';
+  const imgA=createMedia(sources[0]||''), imgB=createMedia(sources[1]||sources[0]||'');
+  a.appendChild(imgA); b.appendChild(imgB); container.append(a,b);
+  function createMedia(src){
+    if(!src) return document.createElement('div');
+    const url = encodeURI(src);
+    if(/\.(mp4|webm|ogg)$/i.test(url)){ const v=document.createElement('video'); v.src=url; v.muted=true; v.playsInline=true; v.autoplay=true; v.loop=true; v.controls=false; v.style.background='#000'; return v; }
+    const i=document.createElement('img'); i.src=url; i.loading='lazy'; i.alt=''; return i;
+  }
+  let idx=0,useA=true,timer=null;
+  function show(n){
+    idx=(n+sources.length)%sources.length;
+    const nextSrc=sources[idx];
+    const target=useA?b:a; const active=useA?a:b;
+    target.replaceChildren(createMedia(nextSrc));
+    active.classList.remove('active'); target.classList.add('active'); useA=!useA;
+    if(dots) dots.childNodes.forEach((d,i)=> d.className='dot'+(i===idx?' active':''));
+  }
+  let dots=null;
+  if(sources.length>1){
+    const left=document.createElement('div'), right=document.createElement('div');
+    left.className='ctrl left'; left.textContent='‹'; right.className='ctrl right'; right.textContent='›';
+    left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1); container.append(left,right);
+    dots=document.createElement('div'); dots.className='dots';
+    sources.forEach((_,i)=>{ const sp=document.createElement('span'); sp.className='dot'+(i===0?' active':''); sp.onclick=()=>show(i); dots.append(sp); });
+    container.append(dots);
+  }
+  const start=()=>{ if(autoplay && sources.length>1){ stop(); timer=setInterval(()=>show(idx+1), interval);} };
+  const stop = ()=>{ if(timer){ clearInterval(timer); timer=null; } };
+  container.addEventListener('mouseenter', stop); container.addEventListener('mouseleave', start); start();
+}
+</script>
+<script>
+fetch('projects.json').then(r=>r.json()).then(items=>{
+  const grid=document.getElementById('grid');
+  items.forEach(p=>{
+    const card=document.createElement('a'); card.href='project.html?slug='+encodeURIComponent(p.slug); card.className='card';
+    const sources=(p.images&&p.images.length)?p.images:(p.videos||[]);
+    const slider=document.createElement('div'); mountSlider(slider, sources.length?sources:['assets/images/Airplane Model1.jpg'], 260, {autoplay:true}); card.append(slider);
+    const h3=document.createElement('h3'); h3.textContent=p.title; card.append(h3);
+    const d=document.createElement('p'); d.textContent=p.description||''; card.append(d);
+    const tags=document.createElement('div'); tags.className='tags'; (p.tags||[]).forEach(t=>{const s=document.createElement('span'); s.className='tag'; s.textContent=t; tags.append(s);}); card.append(tags);
+    grid.append(card);
+  });
+});
+</script></body></html>
