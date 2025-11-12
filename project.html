@@ -1,1 +1,68 @@
-<!DOCTYPE html><html><head><meta charset='utf-8'><title>Project</title></head><body><h1>Project Placeholder</h1></body></html>
+<script>
+  const isVideo = (src) => /\.mp4($|\?)/i.test(src);
+  function makeMediaLayer(src) {
+    const layer = document.createElement('div');
+    layer.className = 'slide-layer';
+    if (isVideo(src)) {
+      const v = document.createElement('video');
+      v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
+      v.style.width = '100%'; v.style.height = '100%'; v.style.objectFit = 'cover';
+      layer.appendChild(v);
+    } else {
+      const img = document.createElement('img'); img.src = src; img.loading = 'lazy'; layer.appendChild(img);
+    }
+    return layer;
+  }
+
+  function mountSlider(container, sources, height=420) {
+    container.className = 'slider';
+    container.style.height = height + 'px';
+
+    const a = makeMediaLayer(sources[0]||'');
+    const b = makeMediaLayer(sources[1]||sources[0]||'');
+    a.classList.add('active'); container.append(a,b);
+
+    const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+    const right= document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+    const dots = document.createElement('div'); dots.className='dots';
+    container.append(left,right,dots);
+
+    sources.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
+
+    let idx=0,useA=true;
+    function show(n){
+      idx=(n+sources.length)%sources.length;
+      const next=sources[idx];
+      const front=useA?a:b, back=useA?b:a;
+      const media = makeMediaLayer(next); back.replaceChildren(...media.childNodes);
+      front.classList.remove('active'); back.classList.add('active'); useA=!useA;
+      [...dots.children].forEach((d,i)=>d.className='dot'+(i===idx?' active':''));
+    }
+    left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
+  }
+
+  const qs = new URLSearchParams(location.search);
+  const slug = qs.get('slug');
+
+  fetch('projects.json').then(r=>r.json()).then(items=>{
+    const p = items.find(x=>x.slug===slug);
+    if(!p){ document.getElementById('root').innerHTML='<p>Project not found.</p>'; return; }
+
+    document.querySelector('h1').textContent = p.title;
+    document.getElementById('desc').textContent = p.longDescription || p.description || '';
+
+    const media = (p.media && p.media.length) ? p.media : (p.images || []);
+    const slideBox = document.getElementById('media');
+    if(media.length){ mountSlider(slideBox, media, 420); }
+
+    // model viewer
+    if(p.model){
+      const mw = document.getElementById('model');
+      mw.innerHTML = `
+        <model-viewer src="${p.model}" camera-controls autoplay ar ar-modes="webxr scene-viewer quick-look"
+          style="width:100%;height:420px;border-radius:16px;background:#1f2430"></model-viewer>
+        <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"><\/script>
+      `;
+    }
+  });
+</script>
