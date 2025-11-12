@@ -2,18 +2,16 @@
   {
     "title": "Airplane Model",
     "slug": "airplane-model",
+    "short": "Interactive 3D preview and image gallery.",
+    "tags": [
+      "CAD",
+      "3D"
+    ],
+    "model": "assets/models/AIR_PLANE_CLEAN.glb",
     "images": [
       "assets/images/Airplane Model1.jpg",
       "assets/images/Airplane Model2.jpg",
       "assets/images/Airplane Model3.jpg"
-    ],
-    "model": "assets/models/AIR_PLANE_CLEAN.glb",
-    "tags": [
-      "CAD",
-      "Assembly",
-      "3D"
-    ],
-    "short": "Interactive 3D preview of a cleaned airplane assembly.",
-    "longDescription": "Student practice airplane model cleaned for real\u2011time rendering; includes 3D web viewer and image gallery."
+    ]
   }
 ]

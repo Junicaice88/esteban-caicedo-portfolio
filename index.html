@@ -1,72 +1,62 @@
-<!doctype html>
-<html lang="en"><head>
+
+<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Esteban Caicedo — Portfolio</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-:root{--bg:#0b1220;--card:#151b2b;--ink:#e6e9f5}
-body{background:var(--bg);color:var(--ink)}
-.card{background:rgba(21,27,43,.9);box-shadow:0 8px 30px rgba(0,0,0,.35)}
-.slide{position:relative;overflow:hidden}
-.slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
-.slide img.active{opacity:1}
-.dots{position:absolute;left:0;right:0;bottom:.5rem;display:flex;gap:.4rem;justify-content:center}
-.dot{width:.45rem;height:.45rem;border-radius:999px;background:rgba(255,255,255,.35)}
-.dot.active{background:#fff}
-.ctrl{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;opacity:0;transition:.25s}
-.ctrl.left{left:8px}.ctrl.right{right:8px}.card:hover .ctrl{opacity:1}
-</style>
-</head>
-<body class="font-sans">
-<header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-  <h1 class="text-xl font-semibold">Esteban Caicedo</h1>
-  <nav class="text-sm text-slate-300 space-x-6">
-    <a href="#">Projects</a>
-    <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" rel="noopener">LinkedIn</a>
-  </nav>
-</header>
-<main class="max-w-6xl mx-auto px-6 pb-16">
-  <section class="mb-10">
-    <h2 class="text-3xl font-semibold">Engineering Projects</h2>
-    <p class="text-slate-300 mt-2">Minimal dark theme with image cross‑fade and 3D detail view.</p>
-  </section>
-  <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-</main>
+<title>Portfolio — Airplane Model</title>
+<link rel="stylesheet" href="style.css"/></head>
+<body>
+  <div class="main">
+    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-weight:600">Esteban Caicedo</div>
+      <nav style="display:flex;gap:14px">
+        <a href="#" class="sub">Projects</a>
+        <a href="https://www.linkedin.com" target="_blank" class="sub">LinkedIn</a>
+      </nav>
+    </header>
+
+    <section style="margin:18px 0 22px 0">
+      <h1>Engineering Projects</h1>
+      <p class="sub">Portfolio with CAD/CAE projects, interactive 3D models, and mixed‑media galleries.</p>
+    </section>
+
+    <h2>Projects</h2>
+    <div id="grid" class="grid grid3"></div>
+  </div>
+
 <script>
-const project={
-  title:"Airplane Model",
-  slug:"airplane-model",
-  images:["assets/images/Airplane Model1.jpg","assets/images/Airplane Model2.jpg","assets/images/Airplane Model3.jpg"],
-  model:"assets/models/AIR_PLANE_CLEAN.glb",
-  short:"Interactive 3D preview of a cleaned airplane assembly."
-};
-function buildCard(p){
-  const card=document.createElement('a');
-  card.href="project.html?slug="+encodeURIComponent(p.slug);
-  card.className="card block rounded-2xl overflow-hidden border border-white/5";
-  card.innerHTML=`
-    <div class="slide h-44 sm:h-48 md:h-52 lg:h-56 relative">
-      ${(p.images||[]).map((src,i)=>`<img src="${src}" alt="${p.title} ${i+1}" class="${i===0?'active':''}">`).join('')}
-      <div class="ctrl left" aria-label="Prev">‹</div>
-      <div class="ctrl right" aria-label="Next">›</div>
-      <div class="dots"></div>
-    </div>
-    <div class="p-4">
-      <h3 class="font-medium">${p.title}</h3>
-      <p class="text-sm text-slate-300">${p.short}</p>
-    </div>`;
-  const imgs=[...card.querySelectorAll('img')];
-  const dots=card.querySelector('.dots');
-  imgs.forEach((_,i)=>{const d=document.createElement('span');d.className='dot'+(i===0?' active':'');dots.appendChild(d)});
-  let idx=0,timer=null;
-  function show(n){idx=(n+imgs.length)%imgs.length;imgs.forEach((im,i)=>im.classList.toggle('active',i===idx));dots.childNodes.forEach((d,i)=>d.className='dot'+(i===idx?' active':''))}
-  function start(){if(timer)return;timer=setInterval(()=>show(idx+1),3000)}
-  function stop(){clearInterval(timer);timer=null}
-  card.querySelector('.left').onclick=e=>{e.preventDefault();stop();show(idx-1);start()};
-  card.querySelector('.right').onclick=e=>{e.preventDefault();stop();show(idx+1);start()};
-  card.addEventListener('mouseenter',stop);card.addEventListener('mouseleave',start);start();
-  return card
+async function main(){
+  const grid = document.getElementById('grid');
+  const items = await fetch('projects.json').then(r=>r.json());
+  items.forEach(p=>{
+    const card = document.createElement('a');
+    card.href = 'project.html?slug='+encodeURIComponent(p.slug);
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="p-16">
+        <div class="slider h-64">
+          ${(p.images||[]).map((src,i)=>`
+            <img class="slide ${i===0?'active':''}" src="${src}" style="width:100%;height:100%;object-fit:cover"/>
+          `).join('')}
+          <div class="dots">${(p.images||[]).map((_,i)=>`<span class="dot ${i===0?'active':''}"></span>`).join('')}</div>
+        </div>
+        <div style="margin-top:10px;font-weight:600">${p.title}</div>
+        <div class="sub" style="font-size:14px">${p.short||''}</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          ${(p.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  setInterval(()=>{
+    document.querySelectorAll('.slider').forEach(sl=>{
+      const slides=sl.querySelectorAll('.slide'); const dots=sl.querySelectorAll('.dot');
+      if(slides.length<2) return;
+      let idx=[...slides].findIndex(s=>s.classList.contains('active'));
+      slides[idx].classList.remove('active'); dots[idx].classList.remove('active');
+      idx=(idx+1)%slides.length; slides[idx].classList.add('active'); dots[idx].classList.add('active');
+    });
+  },3000);
 }
-document.getElementById('grid').appendChild(buildCard(project));
+main();
 </script>
 </body></html>

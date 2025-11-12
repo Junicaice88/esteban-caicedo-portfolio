@@ -1,75 +1,84 @@
-<!doctype html>
-<html lang="en"><head>
+
+<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Project — Airplane Model</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script type="importmap">{"imports":{
-  "three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
-  "GLTFLoader":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js",
-  "OrbitControls":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js"
-}}</script>
-<style>
-:root{--bg:#0b1220;--ink:#e6e9f5}
-body{background:var(--bg);color:var(--ink)}
-.card{background:rgba(21,27,43,.9);box-shadow:0 8px 30px rgba(0,0,0,.35)}
-.slider{position:relative;overflow:hidden}
-.slider img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
-.slider img.active{opacity:1}
-.ctrl{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;width:36px;height:36px;border-radius:8px;
-display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;opacity:0;transition:.25s}
-.ctrl.left{left:8px}.ctrl.right{right:8px}.card:hover .ctrl{opacity:1}
-.dots{position:absolute;left:0;right:0;bottom:.5rem;display:flex;gap:.4rem;justify-content:center}
-.dot{width:.45rem;height:.45rem;border-radius:999px;background:rgba(255,255,255,.35)}.dot.active{background:#fff}
-</style>
+<title>Project</title>
+<link rel="stylesheet" href="style.css"/>
+<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
-<body class="font-sans">
-<header class="max-w-6xl mx-auto px-6 py-6"><a href="index.html" class="text-slate-300 hover:text-white">← Back</a></header>
-<main class="max-w-6xl mx-auto px-6 pb-20">
-  <h1 class="text-3xl font-semibold mb-2">Airplane Model</h1>
-  <p class="text-slate-300 mb-6 max-w-3xl">Smooth-surfaced airplane assembly cleaned for real‑time viewing. Explore the model interactively and browse renders below.</p>
-  <div class="grid md:grid-cols-2 gap-6 items-stretch">
-    <div class="card rounded-2xl overflow-hidden border border-white/5"><div id="viewer" style="height:380px;"></div></div>
-    <div class="card rounded-2xl overflow-hidden border border-white/5">
-      <div class="slider h-[380px] relative">
-        <img src="assets/images/Airplane Model1.jpg" class="active" alt="Airplane render 1">
-        <img src="assets/images/Airplane Model2.jpg" alt="Airplane render 2">
-        <img src="assets/images/Airplane Model3.jpg" alt="Airplane render 3">
-        <div class="ctrl left" aria-label="Prev">‹</div>
-        <div class="ctrl right" aria-label="Next">›</div>
-        <div class="dots"></div>
-      </div>
+<body>
+  <div class="main">
+    <a href="index.html" class="sub">&larr; Back</a>
+    <h1 id="title">Project</h1>
+    <p id="desc" class="sub" style="margin-bottom:24px"></p>
+
+    <div class="grid" style="grid-template-columns:repeat(2, minmax(0,1fr)); gap:22px;">
+      <div id="viewer"></div>
+      <div id="carousel" class="slider" style="height:420px"></div>
     </div>
   </div>
-</main>
-<script type="module">
-import * as THREE from 'three';
-import {GLTFLoader} from 'GLTFLoader';
-import {OrbitControls} from 'OrbitControls';
-const container=document.getElementById('viewer');
-const W=container.clientWidth,H=380;
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x0b1220);
-const camera=new THREE.PerspectiveCamera(50,W/H,0.1,1000);camera.position.set(2.4,1.6,2.6);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(devicePixelRatio);renderer.setSize(W,H);container.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xffffff,0x444466,0.8));const d=new THREE.DirectionalLight(0xffffff,0.9);d.position.set(3,3,2);scene.add(d);
-const grid=new THREE.GridHelper(10,10,0x3c435f,0x1f2436);grid.material.opacity=.15;grid.material.transparent=true;scene.add(grid);
-const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
-new GLTFLoader().load('assets/models/AIR_PLANE_CLEAN.glb',(g)=>{
-  const model=g.scene;scene.add(model);
-  const box=new THREE.Box3().setFromObject(model);
-  const size=box.getSize(new THREE.Vector3()).length();
-  const center=box.getCenter(new THREE.Vector3());
-  model.position.sub(center);
-  model.scale.setScalar(2.2/size);
-});
-function onResize(){const w=container.clientWidth;renderer.setSize(w,H);camera.aspect=w/H;camera.updateProjectionMatrix()}
-addEventListener('resize',onResize);
-(function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera)})();
-// slider
-const slider=document.querySelector('.slider');const imgs=[...slider.querySelectorAll('img')];const dots=slider.querySelector('.dots');
-imgs.forEach((_,i)=>{const s=document.createElement('span');s.className='dot'+(i===0?' active':'');dots.appendChild(s)});
-let idx=0,timer=null;function show(n){idx=(n+imgs.length)%imgs.length;imgs.forEach((im,i)=>im.classList.toggle('active',i===idx));dots.childNodes.forEach((d,i)=>d.className='dot'+(i===idx?' active':''))}
-function start(){if(timer)return;timer=setInterval(()=>show(idx+1),3000)}function stop(){clearInterval(timer);timer=null}
-slider.querySelector('.left').onclick=()=>{stop();show(idx-1);start()};slider.querySelector('.right').onclick=()=>{stop();show(idx+1);start()};
-slider.addEventListener('mouseenter',stop);slider.addEventListener('mouseleave',start);start();
+
+<script>
+function qs(k){return new URL(location.href).searchParams.get(k)||'';}
+async function main(){
+  const slug = qs('slug');
+  const items = await fetch('projects.json').then(r=>r.json());
+  const p = items.find(x=>x.slug===slug) || items[0];
+  document.getElementById('title').textContent = p.title;
+  document.getElementById('desc').textContent = "Interactive 3D preview and image gallery.";
+
+  const car = document.getElementById('carousel');
+  (p.images||[]).forEach((src,i)=>{
+    const im = document.createElement('img');
+    im.src = src; im.className = 'slide'+(i===0?' active':'');
+    im.style.cssText = 'width:100%;height:100%;object-fit:cover';
+    car.appendChild(im);
+  });
+  const dots = document.createElement('div'); dots.className='dots';
+  dots.innerHTML = (p.images||[]).map((_,i)=>`<span class="dot ${i===0?'active':''}"></span>`).join('');
+  car.appendChild(dots);
+  let idx=0; if((p.images||[]).length>1){ setInterval(()=>{
+    const slides=car.querySelectorAll('.slide'); const ds=car.querySelectorAll('.dot');
+    slides[idx].classList.remove('active'); ds[idx].classList.remove('active');
+    idx=(idx+1)%slides.length; slides[idx].classList.add('active'); ds[idx].classList.add('active');
+  },3500); }
+
+  // viewer
+  const wrap = document.getElementById('viewer');
+  const w = wrap.clientWidth || 520, h = wrap.clientHeight || 420;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, w/h, 0.01, 2000);
+  camera.position.set(0, 0.4, 3.5);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(w,h); wrap.appendChild(renderer.domElement);
+  const hemi = new THREE.HemisphereLight(0xffffff,0x444444, 1.1); scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff,0.9); dir.position.set(3,4,5); scene.add(dir);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping=true;
+
+  const grid = new THREE.GridHelper(10,10,0x88aaff,0x224466); grid.material.opacity=.12; grid.material.transparent=true; scene.add(grid);
+
+  const loader = new THREE.GLTFLoader();
+  loader.load(p.model, (gltf)=>{
+    const root = gltf.scene; scene.add(root);
+    const box = new THREE.Box3().setFromObject(root);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const center = box.getCenter(new THREE.Vector3());
+    const fitDist = size/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov)/2));
+    camera.position.copy(center).add(new THREE.Vector3(0, size*0.1, fitDist*1.1));
+    camera.near = size/100; camera.far=size*100; camera.updateProjectionMatrix();
+    controls.target.copy(center); controls.update();
+  }, undefined, (e)=>{ console.error('GLB load error:', e); });
+
+  function loop(){ controls.update(); renderer.render(scene,camera); requestAnimationFrame(loop); }
+  loop();
+
+  addEventListener('resize',()=>{
+    const W = wrap.clientWidth || 520, H = wrap.clientHeight || 420;
+    camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.setSize(W,H);
+  });
+}
+main();
 </script>
 </body></html>
