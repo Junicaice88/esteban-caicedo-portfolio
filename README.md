@@ -1,30 +1,31 @@
-# Esteban Caicedo — Engineering Projects
+# Esteban Portfolio (Airplane‑only)
 
-Portfolio con proyectos CAD/CAE, visor 3D interactivo (glTF/GLB) y galerías de imágenes y videos.
+Minimal, working baseline with a single project (**Airplane Model**) using your existing `assets/` folder.
 
-## Version v2.4.4
+## Expected assets
 
-### Proyectos actuales
-- Airplane Model
-- Antonov AN-10 — Surfaces-001
-- Fifth Mill Practice
-- First Lathe Project
+Place (or keep) these inside the site root:
 
-## Estructura
-/
-├─ index.html
-├─ project.html
-├─ projects.json
-├─ style.css
-├─ README.md
-└─ assets/
-   ├─ images/
-   ├─ videos/
-   └─ models/
+```
+assets/
+├─ images/
+│  ├─ Airplane Model1.jpg
+│  ├─ Airplane Model2.jpg
+│  └─ Airplane Model3.jpg
+└─ models/
+   └─ AIR_PLANE_CLEAN.glb
+```
 
-## Cómo subir (GitHub + Netlify)
-1. Descomprime el ZIP.
-2. Repo → Add file → Upload files.
-3. Arrastra todo (incluida la carpeta assets/).
-4. Commit: v2.4.4 – Added “First Lathe Project”.
-5. Netlify redeploy.
+> **Important:** Names are case‑sensitive and spaces must match exactly.
+
+## Files included
+
+- `index.html` – project grid and image slider
+- `project.html` – detail page with `<model-viewer>` 3D viewer + media slider
+- `style.css` – dark UI
+- `projects.json` – data (Airplane only)
+- `README.md`
+
+## Deploy
+
+Upload the contents to your GitHub repo root (along with your `assets/` folder) and redeploy Netlify/Vercel. 
