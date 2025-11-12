@@ -1,35 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Engineering Projects</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    const safe = p => (typeof p === 'string' ? encodeURI(p) : p);
-    async function init(){
-      const res = await fetch('projects.json');
-      const data = await res.json();
-      const grid = document.getElementById('grid');
-      data.forEach(p=>{
-        const card=document.createElement('a');
-        card.href='project.html?slug='+encodeURIComponent(p.slug);
-        card.className='block rounded-xl border border-gray-700 bg-gray-800 p-4 hover:border-gray-500';
-        const title=document.createElement('h2');
-        title.textContent=p.title; title.className='text-xl font-semibold mb-2';
-        const desc=document.createElement('p');
-        desc.textContent=p.description; desc.className='text-sm text-gray-400';
-        card.append(title,desc);
-        grid.appendChild(card);
-      });
-    }
-    window.onload=init;
-  </script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Esteban Caicedo – Engineering Projects</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-<body class="bg-gray-900 text-white">
-  <div class="max-w-5xl mx-auto py-10">
-    <h1 class="text-3xl font-bold mb-6">Engineering Projects</h1>
-    <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-  </div>
+<body>
+  <header class="header">
+    <a href="index.html"><strong>Esteban Caicedo</strong></a>
+    <div class="spacer"></div>
+    <a href="#projects">Projects</a>
+    <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+  </header>
+
+  <main class="container" id="projects">
+    <h1>Engineering Projects</h1>
+    <p class="lead">Portfolio with CAD/CAE projects, interactive 3D models, and mixed-media galleries.</p>
+    <div id="grid" class="grid"></div>
+  </main>
+
+<script>
+// Helpers
+const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
+
+// Make a media layer (img or video)
+function makeLayer(src){
+  const layer = document.createElement('div');
+  layer.className = 'slide-layer';
+  if(isVideo(src)){
+    const v = document.createElement('video');
+    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
+    layer.appendChild(v);
+  } else {
+    const img = document.createElement('img');
+    img.src = src; img.loading = 'lazy';
+    layer.appendChild(img);
+  }
+  return layer;
+}
+
+// Slider with cross-fade (supports images/videos)
+function mountSlider(container, sources, height=260){
+  container.classList.add('slider');
+  container.style.height = height + 'px';
+
+  const a = makeLayer(sources[0] || '');
+  const b = makeLayer(sources[1] || sources[0] || '');
+  a.classList.add('active');
+  container.append(a,b);
+
+  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
+  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
+  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
+  container.append(left, right, dots);
+
+  sources.forEach((_,i)=>{
+    const d = document.createElement('span');
+    d.className = 'dot' + (i===0?' active':'');
+    d.onclick = () => show(i);
+    dots.appendChild(d);
+  });
+
+  let idx = 0, useA = true, timer = null;
+  function show(n){
+    if(!sources.length) return;
+    idx = (n + sources.length) % sources.length;
+    const next = sources[idx];
+    const front = useA ? a : b;
+    const back  = useA ? b : a;
+    const fresh = makeLayer(next);
+    back.replaceChildren(...fresh.childNodes);
+    front.classList.remove('active');
+    back.classList.add('active');
+    useA = !useA;
+    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
+  }
+  left.onclick = ()=>show(idx-1);
+  right.onclick = ()=>show(idx+1);
+
+  function start(){ if(sources.length>1) timer = setInterval(()=>show(idx+1), 3000); }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  container.addEventListener('mouseenter', stop);
+  container.addEventListener('mouseleave', start);
+  start();
+}
+
+// Build cards from projects.json
+fetch('projects.json').then(r=>r.json()).then(items=>{
+  const grid = document.getElementById('grid');
+  items.forEach(p=>{
+    const a = document.createElement('a');
+    a.href = 'project.html?slug=' + encodeURIComponent(p.slug);
+    a.className = 'card';
+
+    const slider = document.createElement('div');
+    const sources = (p.media && p.media.length ? p.media : (p.images || [])).slice();
+    if(!sources.length){ sources.push('assets/images/Airplane Model1.jpg'); } // harmless fallback
+    mountSlider(slider, sources, 260);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    body.innerHTML = `
+      <h3>${p.title}</h3>
+      <p class="lead">${p.description || ''}</p>
+      <div class="tags">${(p.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div>
+    `;
+
+    a.append(slider, body);
+    grid.appendChild(a);
+  });
+});
+</script>
 </body>
 </html>
