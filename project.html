@@ -1,102 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Project – Detail</title>
-  <link rel="stylesheet" href="style.css"/>
+  <title>Project — Esteban Caicedo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { bg:'#0b1220', card:'#151b2b', ink:'#e6e9f5', mute:'#9aa3b2', brand:{DEFAULT:'#4f6af3',dim:'#4058ca'} },
+      borderRadius: { '2xl': '1.25rem' }
+    }}};
+  </script>
+  <style>
+    .slider { position: relative; overflow: hidden; }
+    .slide-layer { position:absolute; inset:0; opacity:0; transition: opacity .6s ease-in-out; }
+    .slide-layer img { width: 100%; height: 100%; object-fit: cover; display:block; user-select:none; -webkit-user-drag:none; }
+    .slide-layer.active { opacity:1; }
+    .ctrl { position:absolute; top:50%; transform:translateY(-50%); padding:6px 10px; background:rgba(0,0,0,.45); color:white; border-radius:8px; cursor:pointer; user-select:none; opacity:0; transition:.2s; pointer-events:none; }
+    .ctrl.left { left:8px; } .ctrl.right { right:8px; }
+    .slider:hover .ctrl { opacity:1; pointer-events:auto; }
+    .dots { position:absolute; bottom:8px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
+    .dot { width:8px; height:8px; border-radius:9999px; background: rgba(255,255,255,.35); }
+    .dot.active { background: white; }
+  </style>
+
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-<body>
-  <div class="header">
-    <a href="index.html" class="back">← Back</a>
-  </div>
+<body class="bg-bg text-ink font-sans">
+  <header class="sticky top-0 backdrop-blur bg-bg/70 border-b border-white/5 z-10">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-brand">← Back</a>
+      <a href="https://www.linkedin.com/in/esteban-caicedo-945bb1300" target="_blank" class="hover:text-brand text-sm">LinkedIn</a>
+    </nav>
+  </header>
 
-  <main class="container" id="root">
-    <h1 id="title">Project</h1>
-    <p id="desc" class="lead"></p>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <h1 id="title" class="text-3xl font-semibold mb-2"></h1>
+    <p id="desc" class="text-mute leading-relaxed mb-3"></p>
+    <div id="tags" class="text-mute flex flex-wrap gap-2 mb-6"></div>
 
-    <div class="row">
-      <div class="viewer" id="viewerBox"></div>
-      <div class="media" id="mediaBox"></div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <model-viewer id="mv" camera-controls auto-rotate style="width:100%;height:360px;background:#0f1525;"></model-viewer>
+      </div>
+      <div class="bg-card/70 border border-white/5 rounded-2xl overflow-hidden">
+        <div id="carousel" class="slider" style="height:360px"></div>
+      </div>
     </div>
   </main>
 
-<script>
-const isVideo = (src) => /\.(mp4)(\?|$)/i.test(src);
+  <footer class="border-t border-white/5 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-8 text-center text-mute">
+      © 2025 Esteban Caicedo
+    </div>
+  </footer>
 
-function makeLayer(src){
-  const layer = document.createElement('div');
-  layer.className = 'slide-layer';
-  if(isVideo(src)){
-    const v = document.createElement('video');
-    v.src = src; v.muted = true; v.playsInline = true; v.loop = true; v.autoplay = true;
-    layer.appendChild(v);
-  } else {
-    const img = document.createElement('img');
-    img.src = src; img.loading='lazy';
-    layer.appendChild(img);
-  }
-  return layer;
-}
+  <script>
+    function mountSlider(container, images, height){
+      container.classList.add('slider');
+      container.style.height = height + 'px';
 
-function mountSlider(container, sources, height=420){
-  container.className = 'slider';
-  container.style.height = height + 'px';
-  const a = makeLayer(sources[0]||''); a.classList.add('active');
-  const b = makeLayer(sources[1]||sources[0]||'');
-  container.append(a,b);
+      const a = document.createElement('div'); a.className='slide-layer active';
+      const b = document.createElement('div'); b.className='slide-layer';
+      const imgA = document.createElement('img'); const imgB = document.createElement('img');
+      imgA.src = images[0] || ''; imgB.src = images[1] || images[0] || '';
+      a.appendChild(imgA); b.appendChild(imgB);
+      container.append(a,b);
 
-  const left  = Object.assign(document.createElement('div'), {className:'ctrl left',  textContent:'‹'});
-  const right = Object.assign(document.createElement('div'), {className:'ctrl right', textContent:'›'});
-  const dots  = Object.assign(document.createElement('div'), {className:'dots'});
-  container.append(left,right,dots);
+      let idx = 0, useA = true;
 
-  sources.forEach((_,i)=>{
-    const d = document.createElement('span');
-    d.className = 'dot' + (i===0?' active':'');
-    d.onclick = () => show(i);
-    dots.appendChild(d);
-  });
+      function show(n){
+        idx = (n+images.length)%images.length;
+        const nextSrc = images[idx];
+        if(useA){ imgB.src = nextSrc; a.classList.remove('active'); b.classList.add('active'); }
+        else   { imgA.src = nextSrc; b.classList.remove('active'); a.classList.add('active'); }
+        useA = !useA;
+        updateDots();
+      }
 
-  let idx = 0, useA=true;
-  function show(n){
-    if(!sources.length) return;
-    idx = (n + sources.length) % sources.length;
-    const next = sources[idx];
-    const front = useA ? a : b;
-    const back  = useA ? b : a;
-    const fresh = makeLayer(next);
-    back.replaceChildren(...fresh.childNodes);
-    front.classList.remove('active');
-    back.classList.add('active');
-    useA = !useA;
-    [...dots.children].forEach((d,i)=>d.className='dot' + (i===idx?' active':''));
-  }
-  left.onclick = ()=>show(idx-1);
-  right.onclick = ()=>show(idx+1);
-}
+      let dots = null;
+      function updateDots(){
+        if(!dots) return;
+        dots.childNodes.forEach((d,k)=> d.className='dot'+(k===idx?' active':''));
+      }
 
-const qs = new URLSearchParams(location.search);
-const slug = qs.get('slug');
+      if(images.length > 1){
+        const left = document.createElement('div'); left.className='ctrl left'; left.textContent='‹';
+        const right = document.createElement('div'); right.className='ctrl right'; right.textContent='›';
+        dots = document.createElement('div'); dots.className='dots';
+        images.forEach((_,i)=>{ const d=document.createElement('span'); d.className='dot'+(i===0?' active':''); d.onclick=()=>show(i); dots.appendChild(d); });
+        container.append(left,right,dots);
+        left.onclick=()=>show(idx-1); right.onclick=()=>show(idx+1);
 
-fetch('projects.json').then(r=>r.json()).then(items=>{
-  const p = items.find(x=>x.slug===slug) || items[0];
-  document.getElementById('title').textContent = p.title;
-  document.getElementById('desc').textContent  = p.longDescription || p.description || '';
+        // Swipe/drag
+        let startX = null, dragging = false;
+        const threshold = 40;
+        const onStart = e => { startX = (e.touches? e.touches[0].clientX : e.clientX); dragging = true; };
+        const onMove = e => {
+          if(!dragging) return;
+          const x = (e.touches? e.touches[0].clientX : e.clientX);
+          if (Math.abs(x - startX) > threshold){
+            set(x < startX ? idx+1 : idx-1);
+            dragging = false;
+          }
+        };
+        const onEnd = () => { dragging = false; };
+        container.addEventListener('mousedown', onStart);
+        container.addEventListener('mousemove', onMove);
+        container.addEventListener('mouseup', onEnd);
+        container.addEventListener('mouseleave', onEnd);
+        container.addEventListener('touchstart', onStart, {passive:true});
+        container.addEventListener('touchmove', onMove, {passive:true});
+        container.addEventListener('touchend', onEnd);
 
-  // Media (images or videos)
-  const media = (p.media && p.media.length) ? p.media : (p.images || []);
-  if(media.length){
-    mountSlider(document.getElementById('mediaBox'), media, 420);
-  }
+      }
+    }
 
-  // 3D model (if provided)
-  if(p.model){
-    const vb = document.getElementById('viewerBox');
-    vb.innerHTML = `<model-viewer src="${p.model}" camera-controls autoplay style="width:100%;height:100%"></model-viewer>`;
-  }
-});
-</script>
+    function qs(k){return new URLSearchParams(location.search).get(k);}
+    const slug = qs('slug');
+
+    fetch('projects.json').then(r=>r.json()).then(items=>{
+      const p = items.find(x=>x.slug===slug);
+      if(!p){ document.getElementById('title').textContent='Project not found'; return; }
+
+      document.getElementById('title').textContent = p.title;
+      document.getElementById('desc').textContent = p.longDescription || 'Project description coming soon.';
+      const tg = document.getElementById('tags');
+      (p.tags||[]).forEach(t=>{ const s=document.createElement('span'); s.className='text-xs px-2 py-1 rounded bg-white/5 border border-white/10'; s.textContent=t; tg.appendChild(s); });
+      if(p.model){ document.getElementById('mv').setAttribute('src', p.model); }
+      const imgs = (p.images && p.images.length)? p.images : (p.image? [p.image]:[]);
+      mountSlider(document.getElementById('carousel'), imgs, 360);
+    });
+  </script>
 </body>
 </html>
