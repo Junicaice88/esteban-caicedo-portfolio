@@ -2,13 +2,9 @@
   {
     "title": "Airplane Model",
     "slug": "airplane-model",
-    "description": "Concept single-engine light aircraft model \u2014 interactive 3D viewer and renders.",
-    "longDescription": "WIP \u2014 Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
-    "tags": [
-      "CAD",
-      "Assembly",
-      "3D"
-    ],
+    "description": "Concept single-engine light aircraft model — interactive 3D viewer and renders.",
+    "longDescription": "WIP — Detailed description to be added (design intent, constraints, mating strategy, mass properties, and manufacturing considerations).",
+    "tags": ["CAD", "Assembly", "3D"],
     "images": [
       "assets/images/Airplane Model1.jpg",
       "assets/images/Airplane Model2.jpg",
@@ -17,15 +13,11 @@
     "model": "assets/models/AIR_PLANE_CLEAN.glb"
   },
   {
-    "title": "Antonov AN-10 \u2014 Surfaces-001",
+    "title": "Antonov AN-10 — Surfaces-001",
     "slug": "antonov-an10",
-    "description": "Surface-model practice: AN-10 transport aircraft \u2014 clean topology and renders.",
+    "description": "Surface-model practice: AN-10 transport aircraft — clean topology and renders.",
     "longDescription": "First pass at the Antonov AN-10 using a surface-driven workflow (lofted skins, guide curves, and continuity checks).",
-    "tags": [
-      "CAD",
-      "Surfaces",
-      "3D"
-    ],
+    "tags": ["CAD", "Surfaces", "3D"],
     "images": [
       "assets/images/Antonov1.jpg",
       "assets/images/Antonov2.jpg",
@@ -36,13 +28,9 @@
   {
     "title": "Fifth Mill Practice",
     "slug": "fifth-mill-practice",
-    "description": "CNC mill practice \u2014 three operations, roughing/finishing toolpaths; videos + 3D model viewer.",
+    "description": "CNC mill practice — three operations, roughing/finishing toolpaths; videos + 3D model viewer.",
     "longDescription": "Three-setup milling exercise documenting CAM strategy and surface finish evolution across operations.",
-    "tags": [
-      "CAD",
-      "Manufacturing",
-      "3D"
-    ],
+    "tags": ["CAD", "Manufacturing", "3D"],
     "videos": [
       "assets/videos/Fifth Mill Practice1.mp4",
       "assets/videos/Fifth Mill Practice2.mp4",
@@ -53,28 +41,18 @@
   {
     "title": "First Lathe Project",
     "slug": "first-lathe-project",
-    "description": "Intro lathe practice \u2014 basic turning ops with single video and 3D model viewer.",
+    "description": "Intro lathe practice — basic turning ops with single video and 3D model viewer.",
     "longDescription": "First turning exercise focusing on safety, tool approach, and dimensional control.",
-    "tags": [
-      "CAD",
-      "Manufacturing",
-      "3D"
-    ],
-    "videos": [
-      "assets/videos/First Lathe Project.mp4"
-    ],
-    "model": "assets/models/First Lathe Project_CLEAN.glb"
+    "tags": ["CAD", "Manufacturing", "3D"],
+    "videos": ["assets/videos/First Lathe Project.mp4"],
+    "model": "assets/models/First Lathe Project.glb"
   },
   {
     "title": "First Mill Practice",
     "slug": "first-mill-practice",
-    "description": "CNC mill practice \u2014 facing, pocketing, contour; two videos + 3D model.",
+    "description": "CNC mill practice — facing, pocketing, contour; two videos + 3D model.",
     "longDescription": "Two-setup CNC practice exploring feeds/speeds, stepdown/stepover, and verification versus the CAD model.",
-    "tags": [
-      "CAD",
-      "Manufacturing",
-      "3D"
-    ],
+    "tags": ["CAD", "Manufacturing", "3D"],
     "videos": [
       "assets/videos/First Mill Practice1.mp4",
       "assets/videos/First Mill Practice2.mp4"
